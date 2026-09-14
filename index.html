@@ -927,41 +927,49 @@
         const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         // Local Storage Key (used as offline fallback)
-        const STORAGE_KEY = 'jumboo_shop_store_data_v11';
+        const STORAGE_KEY = 'jumboo_shop_store_data_v12';
 
-        // Default state
+        // Default state aligning storefront with service items
         const defaultState = {
             settings: {
                 storeName: 'JUMBOO SHOP 🌼',
                 lineId: '@655ayoko',
                 lineUrl: 'https://lin.ee/8eKqm7X'
             },
-            categories: ['ทั้งหมด', 'พวงกุญแจไหมพรม', 'กระเป๋าแฮนด์เมด', 'เคสโทรศัพท์เดคูพาจ', 'ของขวัญ DIY'],
+            categories: ['ทั้งหมด', 'ป้ายบัญชี / ป้ายร้านค้า', 'ลายน้ำ / โลโก้', 'งานกราฟิกและสื่อออนไลน์', 'รับทำเว็บไซต์'],
             categoriesRaw: [], // keeps track of {id, name}
             products: [
                 {
                     id: 'prod-1',
-                    title: 'พวงกุญแจดอกเดซี่ไหมพรม 🌼',
-                    category: 'พวงกุญแจไหมพรม',
-                    price: 89,
-                    imageUrl: 'https://images.unsplash.com/photo-1607344645866-009c320b5ab8?w=500&auto=format&fit=crop&q=80',
-                    description: 'พวงกุญแจไหมพรมถักมือ รูปดอกเดซี่พาสเทล น่ารักละมุน เหมาะสำหรับห้อยกระเป๋าหรือกุญแจบ้าน'
+                    title: 'ป้ายบัญชีพาสเทล สไตล์มินิมอล 💳',
+                    category: 'ป้ายบัญชี / ป้ายร้านค้า',
+                    price: 69,
+                    imageUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=500&auto=format&fit=crop&q=80',
+                    description: 'ป้ายบัญชีพร้อม QR Code โทนสีหวาน น่ารัก อ่านง่าย เพิ่มความน่าเชื่อถือให้ร้านค้า'
                 },
                 {
                     id: 'prod-2',
-                    title: 'กระเป๋าไหมพรมสะพายข้างพาสเทล 🧶',
-                    category: 'กระเป๋าแฮนด์เมด',
-                    price: 350,
-                    imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&auto=format&fit=crop&q=80',
-                    description: 'กระเป๋าถักไหมพรมเนื้อนุ่ม ถักแน่น แข็งแรง ทนทาน จุของได้เยอะ เหมาะกับลุคมินิมอล'
+                    title: 'ลายน้ำติดรูปสินค้า / โลโก้ร้านค้า ✨',
+                    category: 'ลายน้ำ / โลโก้',
+                    price: 99,
+                    imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=500&auto=format&fit=crop&q=80',
+                    description: 'ลายน้ำไฟล์ PNG พื้นหลังโปร่งใส วางแปะบนรูปสินค้าได้ทันที ป้องกันการดูดรูป'
                 },
                 {
                     id: 'prod-3',
-                    title: 'เคสโทรศัพท์แต่งวิปครีมเทียม 🍦',
-                    category: 'เคสโทรศัพท์เดคูพาจ',
-                    price: 290,
-                    imageUrl: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=500&auto=format&fit=crop&q=80',
-                    description: 'เคสโทรศัพท์ DIY ประดับวิปครีมเทียมและเรซินรูปขนมหวาน เลือกสีวิปครีมและตัวการ์ตูนสั่งทำได้'
+                    title: 'ป้ายเปิดรับออเดอร์ / ป้ายโปรโมชั่น 📢',
+                    category: 'งานกราฟิกและสื่อออนไลน์',
+                    price: 89,
+                    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31727221eb?w=500&auto=format&fit=crop&q=80',
+                    description: 'ป้ายกราฟิกประกาศเปิดร้าน ปิดยอด หรือจัดโปรโมชั่นประจำเดือน คุมโทนร้านสดใส'
+                },
+                {
+                    id: 'prod-4',
+                    title: 'เว็บไซต์ร้านค้า / เช็คคิวงาน Single Page 🌐',
+                    category: 'รับทำเว็บไซต์',
+                    price: 990,
+                    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=80',
+                    description: 'หน้าเว็บรวมสินค้าและระบบตรวจสถานะงาน เชื่อมต่อ LINE OA ดูแลง่าย โหลดไวทันใจ'
                 }
             ],
             queues: [
@@ -970,8 +978,8 @@
                     code: 'JB0001-Q',
                     customerName: 'คุณเมย์',
                     contact: 'LINE: may_diy',
-                    items: 'พวงกุญแจดอกเดซี่ไหมพรม x2',
-                    note: 'ขอไหมพรมโทนชมพูพาสเทล',
+                    items: 'ป้ายบัญชีพาสเทล x2',
+                    note: 'ขอโทนชมพู-ม่วงพาสเทล',
                     status: 'delivered',
                     orderDate: '2026-09-08'
                 }
@@ -1054,7 +1062,7 @@
                     appState.products = prodRes.map(p => ({
                         id: p.id,
                         title: p.title,
-                        category: p.categories?.name || 'สินค้าทั่วไป',
+                        category: p.categories?.name || 'ทั่วไป',
                         categoryId: p.category_id,
                         price: parseFloat(p.price) || 0,
                         imageUrl: p.image_url,
@@ -1116,6 +1124,7 @@
             renderStorefrontCoupons();
             renderPromotionsTab();
             renderQueueList();
+            renderLineItemForms(); // Re-render line item dropdowns with latest categories
             if (appState.isAdminLoggedIn) {
                 renderAdminTables();
             }
@@ -1127,7 +1136,6 @@
             try {
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (session?.user) {
-                    // Check if current user exists in admins table
                     const { data: adminRow, error: adminErr } = await supabaseClient
                         .from('admins')
                         .select('user_id')
@@ -1162,13 +1170,11 @@
                 return;
             }
 
-            // Button loading indicator
             const originalBtnHtml = loginBtn.innerHTML;
             loginBtn.disabled = true;
             loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบสิทธิ์...`;
 
             try {
-                // 1. Supabase Auth Sign In
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
@@ -1189,7 +1195,6 @@
                     return;
                 }
 
-                // 2. Check if user is in 'admins' table
                 const { data: adminRow, error: adminErr } = await supabaseClient
                     .from('admins')
                     .select('user_id')
@@ -1204,7 +1209,6 @@
                     return;
                 }
 
-                // 3. Login successful & verified admin
                 setAdminLoggedInState(user);
                 showToast(`ยินดีต้อนรับแอดมิน: ${user.email}`);
                 fetchAllDataFromSupabase();
@@ -1672,16 +1676,19 @@
                 });
             });
 
+            // หมวดหมู่ที่ไม่รวม "ทั้งหมด" เพื่อนำมาเป็นตัวเลือกในฟอร์ม
+            const availableCategories = appState.categories.filter(c => c !== 'ทั้งหมด');
+
             let html = '';
             for (let i = 0; i < count; i++) {
                 const prev = prevValues[i] || {};
-                const catVal = prev.cat || (appState.categories.filter(c => c !== 'ทั้งหมด')[0] || '');
+                const catVal = prev.cat || (availableCategories[0] || '');
                 const typeVal = prev.type || '';
                 const textVal = prev.text || '';
                 const toneVal = prev.tone || '';
                 const noteVal = prev.note || '';
 
-                const catOptions = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => 
+                const catOptions = availableCategories.map(c => 
                     `<option value="${c}" ${c === catVal ? 'selected' : ''}>${c}</option>`
                 ).join('');
 
@@ -2151,6 +2158,7 @@
                 document.getElementById('new-category-name').value = '';
                 renderCategoryFilters();
                 renderCategoryManageList();
+                renderLineItemForms();
                 showToast('เพิ่มแนวสินค้าสำเร็จ');
             }
         }
@@ -2176,6 +2184,7 @@
             saveLocalState();
             renderCategoryFilters();
             renderCategoryManageList();
+            renderLineItemForms();
             showToast('ลบแนวสินค้าเรียบร้อย');
         }
 
