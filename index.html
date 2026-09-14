@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Free CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Fonts Kanit & Prompt -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -489,21 +491,32 @@
         <!-- ==================== TAB 5: ADMIN PANEL ==================== -->
         <section id="tab-admin" class="tab-content space-y-6 hidden">
             
-            <!-- Admin Login Lock Screen -->
+            <!-- Admin Supabase Login Screen -->
             <div id="admin-login-card" class="max-w-md mx-auto bg-white p-8 rounded-3xl border border-amber-300 shadow-md space-y-6 text-center">
                 <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto text-amber-800 text-2xl">
-                    <i class="fa-solid fa-lock"></i>
+                    <i class="fa-solid fa-user-lock"></i>
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold text-amber-950">เข้าสู่ระบบแอดมิน</h2>
-                    <p class="text-xs text-amber-700 mt-1">กรอกรหัสผ่านเพื่อจัดการสินค้า คิว และคูปอง (รหัสผ่านเริ่มต้น: <span class="font-bold underline">1234</span>)</p>
+                    <p class="text-xs text-amber-700 mt-1">กรอกอีเมลและรหัสผ่าน Supabase Authentication เพื่อเข้าจัดการระบบ</p>
                 </div>
-                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
                     <div>
-                        <input type="password" id="admin-passcode" placeholder="กรอกรหัสผ่าน (1234)" required class="w-full px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-lg tracking-widest text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <label class="block text-xs font-bold text-amber-900 mb-1">อีเมลผู้ดูแลระบบ (Admin Email)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 text-sm"></i>
+                            <input type="email" id="admin-email" placeholder="admin@example.com" required class="w-full pl-10 pr-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </div>
                     </div>
-                    <button type="submit" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold transition shadow-sm">
-                        ปลดล็อกเข้าใช้งาน
+                    <div>
+                        <label class="block text-xs font-bold text-amber-900 mb-1">รหัสผ่าน (Password)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 text-sm"></i>
+                            <input type="password" id="admin-password" placeholder="••••••••" required class="w-full pl-10 pr-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </div>
+                    </div>
+                    <button type="submit" id="admin-login-btn" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบด้วย Supabase
                     </button>
                 </form>
             </div>
@@ -519,7 +532,10 @@
                         </div>
                         <div>
                             <h2 class="font-bold text-lg text-amber-950">ระบบจัดการหลังบ้าน (Admin Panel)</h2>
-                            <p class="text-xs text-amber-800">จัดการข้อมูลสินค้า คิวงาน โปรโมชั่น และคูปองส่วนลด</p>
+                            <p class="text-xs text-amber-800">
+                                ล็อกอินแล้วในชื่อ: <span id="admin-user-email-display" class="font-semibold text-green-800"></span> 
+                                <span class="ml-2 inline-flex items-center gap-1 bg-green-200 text-green-900 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-shield-check"></i> ยืนยันสิทธิ์ Supabase Admin</span>
+                            </p>
                         </div>
                     </div>
                     <button onclick="adminLogout()" class="px-4 py-2 bg-white hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-xl text-xs font-semibold transition self-start sm:self-auto flex items-center gap-1.5">
@@ -683,12 +699,8 @@
                                 <label class="block text-xs font-bold text-amber-900 mb-1">LINE Direct Link (https://lin.ee/...)</label>
                                 <input type="url" id="setting-line-url" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-amber-900 mb-1">รหัสผ่านแอดมินใหม่ (ว่างไว้หากไม่ต้องการเปลี่ยน)</label>
-                                <input type="password" id="setting-admin-pass" placeholder="กรอกรหัสใหม่" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                            </div>
-                            <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm transition shadow-sm">
-                                บันทึกการเปลี่ยนแปลง
+                            <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> บันทึกการเปลี่ยนแปลงลง Supabase
                             </button>
                         </form>
                     </div>
@@ -907,18 +919,25 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
     <script>
-        // Storage Key
-        const STORAGE_KEY = 'jumboo_shop_store_data_v10';
+        // ==================== SUPABASE CONFIGURATION ====================
+        const SUPABASE_URL = 'https://whhsgezgatzbakzyisiz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoaHNnZXpnYXR6YmFrenlpc2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODIyNjQsImV4cCI6MjEwNDk1ODI2NH0.wZuyu_EmRcpA4XP3wtKGpcAc6HOdbd2EwF3NZyxeMrU';
+        
+        // Initialize Supabase client
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-        // Default application state
+        // Local Storage Key (used as offline fallback)
+        const STORAGE_KEY = 'jumboo_shop_store_data_v11';
+
+        // Default state
         const defaultState = {
             settings: {
                 storeName: 'JUMBOO SHOP 🌼',
                 lineId: '@655ayoko',
-                lineUrl: 'https://lin.ee/8eKqm7X',
-                adminPass: '1234'
+                lineUrl: 'https://lin.ee/8eKqm7X'
             },
             categories: ['ทั้งหมด', 'พวงกุญแจไหมพรม', 'กระเป๋าแฮนด์เมด', 'เคสโทรศัพท์เดคูพาจ', 'ของขวัญ DIY'],
+            categoriesRaw: [], // keeps track of {id, name}
             products: [
                 {
                     id: 'prod-1',
@@ -943,22 +962,6 @@
                     price: 290,
                     imageUrl: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=500&auto=format&fit=crop&q=80',
                     description: 'เคสโทรศัพท์ DIY ประดับวิปครีมเทียมและเรซินรูปขนมหวาน เลือกสีวิปครีมและตัวการ์ตูนสั่งทำได้'
-                },
-                {
-                    id: 'prod-4',
-                    title: 'พวงกุญแจหมีน้อยไหมพรม 🧸',
-                    category: 'พวงกุญแจไหมพรม',
-                    price: 120,
-                    imageUrl: 'https://images.unsplash.com/photo-1558679908-541bcf1249ff?w=500&auto=format&fit=crop&q=80',
-                    description: 'ตุ๊กตาหมีน้อยไหมพรมขนาดพกพา สั่งระบุสีโบว์และสีไหมพรมตามใจชอบได้'
-                },
-                {
-                    id: 'prod-5',
-                    title: 'กรอบรูปแต่งดอกไม้แห้ง DIY 🖼️',
-                    category: 'ของขวัญ DIY',
-                    price: 250,
-                    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
-                    description: 'กรอบรูปไม้ขนาด 4x6 นิ้ว ตกแต่งด้วยดอกไม้แห้งสีหวาน มอบเป็นของขวัญวันครบรอบหรือวันเกิด'
                 }
             ],
             queues: [
@@ -971,64 +974,24 @@
                     note: 'ขอไหมพรมโทนชมพูพาสเทล',
                     status: 'delivered',
                     orderDate: '2026-09-08'
-                },
-                {
-                    id: 'q-2',
-                    code: 'JB0002-Q',
-                    customerName: 'คุณแอน',
-                    contact: 'โทร 089-123-4567',
-                    items: 'กระเป๋าไหมพรมสะพายข้าง x1',
-                    note: 'จัดส่งด่วนแบบ EMS',
-                    status: 'completed',
-                    orderDate: '2026-09-10'
-                },
-                {
-                    id: 'q-3',
-                    code: 'JB0003-Q',
-                    customerName: 'คุณตุ้ต้ะต๋อมแต๋ม',
-                    contact: 'LINE: fah_sweet',
-                    items: 'เคสโทรศัพท์แต่งวิปครีมเทียม x1 (iPhone 15)',
-                    note: 'เพิ่มตัวการ์ตูนกระต่ายตรงกลาง',
-                    status: 'in_progress',
-                    orderDate: '2026-09-12'
-                },
-                {
-                    id: 'q-4',
-                    code: 'JB0004-Q',
-                    customerName: 'คุณกิ๊ฟ',
-                    contact: 'IG: gift_crafts',
-                    items: 'พวงกุญแจหมีน้อยไหมพรม x3',
-                    note: 'ผูกโบว์สีชมพู 2 ชิ้น สีฟ้า 1 ชิ้น',
-                    status: 'received',
-                    orderDate: '2026-09-13'
-                },
-                {
-                    id: 'q-5',
-                    code: 'JB0005-Q',
-                    customerName: 'คุณป๊อป',
-                    contact: 'LINE: pop_craft',
-                    items: 'กรอบรูปแต่งดอกไม้แห้ง DIY x1',
-                    note: 'เขียนการ์ดอวยพรวันเกิดเพิ่มเติม',
-                    status: 'received',
-                    orderDate: '2026-09-14'
                 }
             ],
             coupons: [
                 { id: 'c-1', code: 'JUMBOO10', desc: 'ส่วนลดพิเศษลูกค้าใหม่', type: 'percent', value: 10, condition: 'ไม่มีขั้นต่ำ', status: 'active' },
-                { id: 'c-2', code: 'WELCOME30', desc: 'ลดทันที 30 บาท', type: 'fixed', value: 30, condition: 'เมื่อสั่งครบ 200฿', status: 'active' },
-                { id: 'c-3', code: 'HANDMADE50', desc: 'ลดจัดเต็ม 50 บาท', type: 'fixed', value: 50, condition: 'เมื่อสั่งซื้อ 3 ชิ้นขึ้นไป', status: 'active' }
+                { id: 'c-2', code: 'WELCOME30', desc: 'ลดทันที 30 บาท', type: 'fixed', value: 30, condition: 'เมื่อสั่งครบ 200฿', status: 'active' }
             ],
             promotions: [
                 { id: 'p-1', title: 'โปรโมชั่นเดือนนี้: สั่งทำ 3 ชิ้นขึ้นไป', desc: 'รับฟรีทันทีของที่ระลึก DIY สลักชื่อฟรีจากทางร้าน พร้อมส่งฟรี!', badge: 'HOT DEAL 🔥' },
                 { id: 'p-2', title: 'งานด่วนภายใน 24 ชม.', desc: 'บริการเร่งด่วนสำหรับผู้ที่ต้องการใช้วันนี้ คิดค่าบริการเพิ่ม 50฿/คิว สอบถามก่อนสั่งได้เลย', badge: 'RUSH ORDER ⚡' }
             ],
             selectedCategory: 'ทั้งหมด',
-            isAdminLoggedIn: false
+            isAdminLoggedIn: false,
+            currentAdminUser: null
         };
 
-        let appState = loadState();
+        let appState = loadLocalState();
 
-        function loadState() {
+        function loadLocalState() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
@@ -1037,33 +1000,256 @@
                         ...defaultState, 
                         ...parsed, 
                         settings: { ...defaultState.settings, ...(parsed.settings || {}) },
-                        coupons: Array.isArray(parsed.coupons) ? parsed.coupons : defaultState.coupons,
-                        promotions: Array.isArray(parsed.promotions) ? parsed.promotions : defaultState.promotions,
-                        isAdminLoggedIn: false 
+                        isAdminLoggedIn: false,
+                        currentAdminUser: null
                     };
                 }
             } catch (e) {
-                console.error("Error loading state", e);
+                console.error("Local state parse error", e);
             }
             return { ...defaultState };
         }
 
-        function saveState() {
+        function saveLocalState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     settings: appState.settings,
                     categories: appState.categories,
+                    categoriesRaw: appState.categoriesRaw,
                     products: appState.products,
                     queues: appState.queues,
                     coupons: appState.coupons,
                     promotions: appState.promotions
                 }));
             } catch (e) {
-                console.error("Error saving state", e);
+                console.error("Local state save error", e);
             }
         }
 
-        // Helper to prepend "คุณ" automatically
+        // ==================== SYNC DATA WITH SUPABASE ====================
+        async function fetchAllDataFromSupabase() {
+            if (!supabaseClient) return;
+
+            try {
+                // 1. Settings
+                const { data: setRes, error: setErr } = await supabaseClient.from('settings').select('*').eq('id', 1).maybeSingle();
+                if (!setErr && setRes) {
+                    appState.settings = {
+                        storeName: setRes.store_name || appState.settings.storeName,
+                        lineId: setRes.line_id || appState.settings.lineId,
+                        lineUrl: setRes.line_url || appState.settings.lineUrl
+                    };
+                }
+
+                // 2. Categories
+                const { data: catRes, error: catErr } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
+                if (!catErr && catRes && catRes.length > 0) {
+                    appState.categoriesRaw = catRes;
+                    appState.categories = ['ทั้งหมด', ...catRes.map(c => c.name)];
+                }
+
+                // 3. Products
+                const { data: prodRes, error: prodErr } = await supabaseClient.from('products').select('*, categories(name)').order('created_at', { ascending: false });
+                if (!prodErr && prodRes && prodRes.length > 0) {
+                    appState.products = prodRes.map(p => ({
+                        id: p.id,
+                        title: p.title,
+                        category: p.categories?.name || 'สินค้าทั่วไป',
+                        categoryId: p.category_id,
+                        price: parseFloat(p.price) || 0,
+                        imageUrl: p.image_url,
+                        description: p.description || ''
+                    }));
+                }
+
+                // 4. Queues
+                const { data: qRes, error: qErr } = await supabaseClient.from('queues').select('*').order('created_at', { ascending: false });
+                if (!qErr && qRes && qRes.length > 0) {
+                    appState.queues = qRes.map(q => ({
+                        id: q.id,
+                        code: q.code,
+                        customerName: q.customer_name,
+                        contact: q.contact || '',
+                        items: q.items,
+                        note: q.note || '',
+                        status: q.status,
+                        orderDate: q.order_date
+                    }));
+                }
+
+                // 5. Coupons
+                const { data: coupRes, error: coupErr } = await supabaseClient.from('coupons').select('*').order('created_at', { ascending: false });
+                if (!coupErr && coupRes && coupRes.length > 0) {
+                    appState.coupons = coupRes.map(c => ({
+                        id: c.id,
+                        code: c.code,
+                        desc: c.description,
+                        type: c.discount_type,
+                        value: parseFloat(c.discount_value) || 0,
+                        condition: c.condition || '',
+                        status: c.status
+                    }));
+                }
+
+                // 6. Promotions
+                const { data: promoRes, error: promoErr } = await supabaseClient.from('promotions').select('*').order('created_at', { ascending: false });
+                if (!promoErr && promoRes && promoRes.length > 0) {
+                    appState.promotions = promoRes.map(p => ({
+                        id: p.id,
+                        badge: p.badge,
+                        title: p.title,
+                        desc: p.description
+                    }));
+                }
+
+                saveLocalState();
+                renderAllViews();
+            } catch (err) {
+                console.warn('Supabase fetch error, fallback to cache:', err);
+            }
+        }
+
+        function renderAllViews() {
+            applyStoreSettings();
+            renderCategoryFilters();
+            renderStorefrontProducts();
+            renderStorefrontCoupons();
+            renderPromotionsTab();
+            renderQueueList();
+            if (appState.isAdminLoggedIn) {
+                renderAdminTables();
+            }
+        }
+
+        // ==================== SUPABASE AUTHENTICATION ====================
+        async function checkSupabaseSession() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (session?.user) {
+                    // Check if current user exists in admins table
+                    const { data: adminRow, error: adminErr } = await supabaseClient
+                        .from('admins')
+                        .select('user_id')
+                        .eq('user_id', session.user.id)
+                        .maybeSingle();
+
+                    if (!adminErr && adminRow) {
+                        setAdminLoggedInState(session.user);
+                    }
+                }
+            } catch (err) {
+                console.error("Session check error", err);
+            }
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            if (!supabaseClient) {
+                showToast('ไม่สามารถเชื่อมต่อ Supabase ได้', 'error');
+                return;
+            }
+
+            const emailInput = document.getElementById('admin-email');
+            const passwordInput = document.getElementById('admin-password');
+            const loginBtn = document.getElementById('admin-login-btn');
+
+            const email = emailInput?.value.trim() || '';
+            const password = passwordInput?.value || '';
+
+            if (!email || !password) {
+                showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+                return;
+            }
+
+            // Button loading indicator
+            const originalBtnHtml = loginBtn.innerHTML;
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบสิทธิ์...`;
+
+            try {
+                // 1. Supabase Auth Sign In
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    showToast(`เข้าสู่ระบบไม่สำเร็จ: ${error.message}`, 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalBtnHtml;
+                    return;
+                }
+
+                const user = data.user;
+                if (!user) {
+                    showToast('ไม่พบข้อมูลผู้ใช้งาน', 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalBtnHtml;
+                    return;
+                }
+
+                // 2. Check if user is in 'admins' table
+                const { data: adminRow, error: adminErr } = await supabaseClient
+                    .from('admins')
+                    .select('user_id')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+
+                if (adminErr || !adminRow) {
+                    await supabaseClient.auth.signOut();
+                    showToast('บัญชีนี้ไม่มีสิทธิ์เป็นแอดมิน (ไม่พบในตาราง admins)', 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalBtnHtml;
+                    return;
+                }
+
+                // 3. Login successful & verified admin
+                setAdminLoggedInState(user);
+                showToast(`ยินดีต้อนรับแอดมิน: ${user.email}`);
+                fetchAllDataFromSupabase();
+
+            } catch (err) {
+                console.error("Admin login error", err);
+                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ Supabase', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalBtnHtml;
+            }
+        }
+
+        function setAdminLoggedInState(user) {
+            appState.isAdminLoggedIn = true;
+            appState.currentAdminUser = user;
+
+            document.getElementById('admin-login-card')?.classList.add('hidden');
+            document.getElementById('admin-panel-content')?.classList.remove('hidden');
+
+            const emailEl = document.getElementById('admin-user-email-display');
+            if (emailEl) emailEl.textContent = user.email || user.id;
+
+            renderAdminTables();
+        }
+
+        async function adminLogout() {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            appState.isAdminLoggedIn = false;
+            appState.currentAdminUser = null;
+
+            document.getElementById('admin-login-card')?.classList.remove('hidden');
+            document.getElementById('admin-panel-content')?.classList.add('hidden');
+
+            const emailInput = document.getElementById('admin-email');
+            const passInput = document.getElementById('admin-password');
+            if (emailInput) emailInput.value = '';
+            if (passInput) passInput.value = '';
+
+            showToast('ออกจากระบบแอดมินเรียบร้อย');
+        }
+
+        // ==================== HELPER FUNCTIONS ====================
         function formatCustomerName(rawName) {
             if (!rawName) return '';
             const trimmed = rawName.trim();
@@ -1073,7 +1259,6 @@
             return 'คุณ' + trimmed;
         }
 
-        // Real-time Customer Name Validation & Auto-prefixing display
         function validateCustomerNameRealtime() {
             const input = document.getElementById('line-customer-name');
             const msgEl = document.getElementById('customer-name-validation-msg');
@@ -1106,7 +1291,6 @@
             }
         }
 
-        // Real-time Coupon Validation
         function validateCouponInputRealtime() {
             const input = document.getElementById('line-coupon-code');
             const msgEl = document.getElementById('coupon-validation-msg');
@@ -1138,7 +1322,6 @@
             }
         }
 
-        // Navigation
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`tab-${tabId}`);
@@ -1162,7 +1345,7 @@
             if (menu) menu.classList.toggle('hidden');
         }
 
-        // Storefront Rendering
+        // ==================== STOREFRONT RENDER ====================
         function renderCategoryFilters() {
             const container = document.getElementById('category-filter-container');
             if (!container) return;
@@ -1388,7 +1571,7 @@
             const searchInput = document.getElementById('queue-search-input');
             const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-            let queues = [...(appState.queues || [])].reverse();
+            let queues = [...(appState.queues || [])];
 
             if (search) {
                 queues = queues.filter(q => 
@@ -1474,7 +1657,7 @@
             if (count < 1) count = 1;
             if (count > 20) {
                 count = 20;
-                if (qtyInput) qtyInput.value = 20; // Visual fix for max limit
+                if (qtyInput) qtyInput.value = 20;
             }
 
             const existingForms = container.querySelectorAll('.item-form-group');
@@ -1560,7 +1743,7 @@
 
             const name = formatCustomerName(rawName);
 
-            // Check if customer name duplicates an existing queue name
+            // Check duplicate name in queue
             const queueList = appState.queues || [];
             const isNameDuplicate = queueList.some(q => (q.customerName || '').trim().toLowerCase() === name.toLowerCase());
             if (isNameDuplicate) {
@@ -1658,14 +1841,10 @@
 
         function copyLineText() {
             if (!currentGeneratedLineMsg) return;
-
-            // Updated modern clipboard copy with fallback
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(currentGeneratedLineMsg).then(() => {
                     showToast('คัดลอกข้อความแล้ว!');
-                }).catch(err => {
-                    fallbackCopyTextToClipboard(currentGeneratedLineMsg);
-                });
+                }).catch(() => fallbackCopyTextToClipboard(currentGeneratedLineMsg));
             } else {
                 fallbackCopyTextToClipboard(currentGeneratedLineMsg);
             }
@@ -1674,7 +1853,7 @@
         function fallbackCopyTextToClipboard(text) {
             const temp = document.createElement('textarea');
             temp.value = text;
-            temp.style.position = 'fixed'; // Prevent scrolling to bottom
+            temp.style.position = 'fixed';
             document.body.appendChild(temp);
             temp.focus();
             temp.select();
@@ -1690,19 +1869,7 @@
         function openLineOAWithCurrentMessage() {
             if (!currentGeneratedLineMsg) return;
             copyLineText();
-            const cleanId = (appState.settings.lineId || '@655ayoko').replace('@', '');
-            const nativeUrl = `line://ti/p/%40${cleanId}`;
-            const fallbackUrl = appState.settings.lineUrl || `https://line.me/R/ti/p/%40${cleanId}`;
-
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (isMobile) {
-                window.location.href = nativeUrl;
-                setTimeout(() => {
-                    window.location.href = fallbackUrl;
-                }, 800);
-            } else {
-                window.open(fallbackUrl, '_blank');
-            }
+            openLineOA();
         }
 
         function openLineOA() {
@@ -1721,30 +1888,7 @@
             }
         }
 
-        // ==================== ADMIN PANEL ====================
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const input = document.getElementById('admin-passcode')?.value;
-            if (input === appState.settings.adminPass) {
-                appState.isAdminLoggedIn = true;
-                document.getElementById('admin-login-card')?.classList.add('hidden');
-                document.getElementById('admin-panel-content')?.classList.remove('hidden');
-                renderAdminTables();
-                showToast('เข้าสู่ระบบแอดมินสำเร็จ');
-            } else {
-                showToast('รหัสผ่านไม่ถูกต้อง', 'error');
-            }
-        }
-
-        function adminLogout() {
-            appState.isAdminLoggedIn = false;
-            document.getElementById('admin-login-card')?.classList.remove('hidden');
-            document.getElementById('admin-panel-content')?.classList.add('hidden');
-            const passInput = document.getElementById('admin-passcode');
-            if (passInput) passInput.value = '';
-            showToast('ออกจากระบบแอดมินเรียบร้อย');
-        }
-
+        // ==================== ADMIN PANEL MANAGEMENT ====================
         function switchAdminSubTab(subTab) {
             document.querySelectorAll('.admin-sub-content').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`admin-sub-${subTab}`);
@@ -1786,8 +1930,7 @@
             // Queues
             const queueBody = document.getElementById('admin-queues-table-body');
             if (queueBody) {
-                const displayQueues = [...(appState.queues || [])].reverse();
-                queueBody.innerHTML = displayQueues.map(q => `
+                queueBody.innerHTML = (appState.queues || []).map(q => `
                     <tr class="hover:bg-amber-50/50">
                         <td class="p-3 font-mono font-bold text-amber-950">${q.code}</td>
                         <td class="p-3">
@@ -1857,7 +2000,7 @@
             if (sUrl) sUrl.value = appState.settings.lineUrl;
         }
 
-        // Product CRUD
+        // ==================== PRODUCT CRUD (SUPABASE CONNECTED) ====================
         function openProductModal(isEdit = false) {
             const select = document.getElementById('prod-category');
             if (select) {
@@ -1887,40 +2030,84 @@
             document.getElementById('prod-desc').value = p.description || '';
         }
 
-        function saveAdminProduct(e) {
+        async function saveAdminProduct(e) {
             e.preventDefault();
             const editId = document.getElementById('prod-edit-id').value;
-            const title = document.getElementById('prod-title').value;
-            const category = document.getElementById('prod-category').value;
+            const title = document.getElementById('prod-title').value.trim();
+            const categoryName = document.getElementById('prod-category').value;
             const price = parseFloat(document.getElementById('prod-price').value) || 0;
-            const imageUrl = document.getElementById('prod-image').value;
-            const description = document.getElementById('prod-desc').value;
+            const imageUrl = document.getElementById('prod-image').value.trim();
+            const description = document.getElementById('prod-desc').value.trim();
 
+            let matchedCat = appState.categoriesRaw.find(c => c.name === categoryName);
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const payload = {
+                        title: title,
+                        category_id: matchedCat ? matchedCat.id : null,
+                        price: price,
+                        image_url: imageUrl,
+                        description: description
+                    };
+
+                    if (editId) {
+                        const { error } = await supabaseClient.from('products').update(payload).eq('id', editId);
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabaseClient.from('products').insert([payload]);
+                        if (error) throw error;
+                    }
+                    await fetchAllDataFromSupabase();
+                    closeModal('modal-admin-product');
+                    showToast('บันทึกข้อมูลสินค้าลง Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    console.error("Supabase Product Save Error", err);
+                    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+                }
+            }
+
+            // Fallback Local
             if (editId) {
                 const idx = appState.products.findIndex(p => p.id === editId);
                 if (idx > -1) {
-                    appState.products[idx] = { id: editId, title, category, price, imageUrl, description };
+                    appState.products[idx] = { id: editId, title, category: categoryName, price, imageUrl, description };
                 }
             } else {
-                appState.products.push({ id: 'prod-' + Date.now(), title, category, price, imageUrl, description });
+                appState.products.unshift({ id: 'prod-' + Date.now(), title, category: categoryName, price, imageUrl, description });
             }
-
-            saveState();
+            saveLocalState();
             closeModal('modal-admin-product');
             renderStorefrontProducts();
             renderAdminTables();
-            showToast('บันทึกข้อมูลสินค้าเรียบร้อย');
+            showToast('บันทึกสินค้าเรียบร้อย');
         }
 
-        function deleteAdminProduct(id) {
+        async function deleteAdminProduct(id) {
+            if (!confirm('คุณต้องการลบสินค้านี้ใช่หรือไม่?')) return;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                    if (error) throw error;
+                    await fetchAllDataFromSupabase();
+                    showToast('ลบสินค้าจาก Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    console.error("Delete product error", err);
+                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
             appState.products = appState.products.filter(p => p.id !== id);
-            saveState();
+            saveLocalState();
             renderStorefrontProducts();
             renderAdminTables();
             showToast('ลบสินค้าเรียบร้อย');
         }
 
-        // Category CRUD
+        // ==================== CATEGORY CRUD (SUPABASE CONNECTED) ====================
         function openCategoryModal() {
             renderCategoryManageList();
             openModal('modal-admin-category');
@@ -1939,12 +2126,28 @@
             `).join('');
         }
 
-        function addCategory(e) {
+        async function addCategory(e) {
             e.preventDefault();
             const val = document.getElementById('new-category-name')?.value.trim();
-            if (val && !appState.categories.includes(val)) {
+            if (!val) return;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('categories').insert([{ name: val }]);
+                    if (error) throw error;
+                    document.getElementById('new-category-name').value = '';
+                    await fetchAllDataFromSupabase();
+                    renderCategoryManageList();
+                    showToast('เพิ่มแนวสินค้าสำเร็จ');
+                    return;
+                } catch (err) {
+                    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+                }
+            }
+
+            if (!appState.categories.includes(val)) {
                 appState.categories.push(val);
-                saveState();
+                saveLocalState();
                 document.getElementById('new-category-name').value = '';
                 renderCategoryFilters();
                 renderCategoryManageList();
@@ -1952,15 +2155,31 @@
             }
         }
 
-        function deleteCategory(catName) {
+        async function deleteCategory(catName) {
+            if (!confirm(`คุณต้องการลบหมวดหมู่ "${catName}" หรือไม่?`)) return;
+
+            const matchedCat = appState.categoriesRaw.find(c => c.name === catName);
+            if (supabaseClient && appState.isAdminLoggedIn && matchedCat) {
+                try {
+                    const { error } = await supabaseClient.from('categories').delete().eq('id', matchedCat.id);
+                    if (error) throw error;
+                    await fetchAllDataFromSupabase();
+                    renderCategoryManageList();
+                    showToast('ลบแนวสินค้าเรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
             appState.categories = appState.categories.filter(c => c !== catName);
-            saveState();
+            saveLocalState();
             renderCategoryFilters();
             renderCategoryManageList();
             showToast('ลบแนวสินค้าเรียบร้อย');
         }
 
-        // Queue CRUD
+        // ==================== QUEUE CRUD (SUPABASE CONNECTED) ====================
         function openQueueModal(isEdit = false) {
             if (!isEdit) {
                 document.getElementById('modal-queue-title').textContent = 'เพิ่มคิวสินค้าใหม่';
@@ -1972,7 +2191,6 @@
                 document.getElementById('queue-note').value = '';
                 document.getElementById('queue-status').value = 'received';
                 
-                // Get valid timezone date format for Thai/Local
                 const today = new Date();
                 const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
                 document.getElementById('queue-date').value = localDate;
@@ -1988,7 +2206,6 @@
             document.getElementById('queue-edit-id').value = q.id;
             document.getElementById('queue-code').value = q.code;
             
-            // Fix substring for Thai "คุณ" (length 3, not 2)
             const rawCustomerName = (q.customerName || '').startsWith('คุณ') ? q.customerName.substring(3) : q.customerName;
             document.getElementById('queue-customer').value = rawCustomerName;
             
@@ -1999,17 +2216,47 @@
             document.getElementById('queue-date').value = q.orderDate;
         }
 
-        function saveAdminQueue(e) {
+        async function saveAdminQueue(e) {
             e.preventDefault();
             const editId = document.getElementById('queue-edit-id').value;
-            const code = document.getElementById('queue-code').value;
+            const code = document.getElementById('queue-code').value.trim();
             const rawCustomerName = document.getElementById('queue-customer').value;
             const customerName = formatCustomerName(rawCustomerName);
-            const contact = document.getElementById('queue-contact').value;
-            const items = document.getElementById('queue-items').value;
-            const note = document.getElementById('queue-note').value;
+            const contact = document.getElementById('queue-contact').value.trim();
+            const items = document.getElementById('queue-items').value.trim();
+            const note = document.getElementById('queue-note').value.trim();
             const status = document.getElementById('queue-status').value;
             const orderDate = document.getElementById('queue-date').value;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const payload = {
+                        code: code,
+                        customer_name: customerName,
+                        contact: contact,
+                        items: items,
+                        note: note,
+                        status: status,
+                        order_date: orderDate
+                    };
+
+                    if (editId) {
+                        const { error } = await supabaseClient.from('queues').update(payload).eq('id', editId);
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabaseClient.from('queues').insert([payload]);
+                        if (error) throw error;
+                    }
+
+                    await fetchAllDataFromSupabase();
+                    closeModal('modal-admin-queue');
+                    showToast('บันทึกข้อมูลคิวลง Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    console.error("Queue save error", err);
+                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
 
             if (editId) {
                 const idx = appState.queues.findIndex(q => q.id === editId);
@@ -2017,25 +2264,39 @@
                     appState.queues[idx] = { id: editId, code, customerName, contact, items, note, status, orderDate };
                 }
             } else {
-                appState.queues.push({ id: 'q-' + Date.now(), code, customerName, contact, items, note, status, orderDate });
+                appState.queues.unshift({ id: 'q-' + Date.now(), code, customerName, contact, items, note, status, orderDate });
             }
 
-            saveState();
+            saveLocalState();
             closeModal('modal-admin-queue');
             renderQueueList();
             renderAdminTables();
             showToast('บันทึกคิวเรียบร้อย');
         }
 
-        function deleteAdminQueue(id) {
+        async function deleteAdminQueue(id) {
+            if (!confirm('คุณต้องการลบคิวนี้ใช่หรือไม่?')) return;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('queues').delete().eq('id', id);
+                    if (error) throw error;
+                    await fetchAllDataFromSupabase();
+                    showToast('ลบคิวจาก Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
             appState.queues = appState.queues.filter(q => q.id !== id);
-            saveState();
+            saveLocalState();
             renderQueueList();
             renderAdminTables();
             showToast('ลบคิวเรียบร้อย');
         }
 
-        // Promotion (Monthly Campaign) CRUD
+        // ==================== PROMOTIONS CRUD (SUPABASE CONNECTED) ====================
         function openPromotionModal(isEdit = false) {
             if (!isEdit) {
                 document.getElementById('modal-promotion-title').textContent = 'เพิ่มแคมเปญโปรโมชั่นใหม่';
@@ -2058,40 +2319,72 @@
             document.getElementById('promo-desc').value = promo.desc;
         }
 
-        function saveAdminPromotion(e) {
+        async function saveAdminPromotion(e) {
             e.preventDefault();
             const editId = document.getElementById('promo-edit-id').value;
             const badge = document.getElementById('promo-badge').value.trim();
             const title = document.getElementById('promo-title').value.trim();
             const desc = document.getElementById('promo-desc').value.trim();
 
-            if (!appState.promotions) appState.promotions = [];
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const payload = { badge, title, description: desc };
+                    if (editId) {
+                        const { error } = await supabaseClient.from('promotions').update(payload).eq('id', editId);
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabaseClient.from('promotions').insert([payload]);
+                        if (error) throw error;
+                    }
+                    await fetchAllDataFromSupabase();
+                    closeModal('modal-admin-promotion');
+                    showToast('บันทึกโปรโมชั่นลง Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
 
+            if (!appState.promotions) appState.promotions = [];
             if (editId) {
                 const idx = appState.promotions.findIndex(p => p.id === editId);
                 if (idx > -1) {
                     appState.promotions[idx] = { id: editId, badge, title, desc };
                 }
             } else {
-                appState.promotions.push({ id: 'p-' + Date.now(), badge, title, desc });
+                appState.promotions.unshift({ id: 'p-' + Date.now(), badge, title, desc });
             }
 
-            saveState();
+            saveLocalState();
             closeModal('modal-admin-promotion');
             renderPromotionsTab();
             renderAdminTables();
             showToast('บันทึกแคมเปญโปรโมชั่นเรียบร้อย');
         }
 
-        function deleteAdminPromotion(id) {
+        async function deleteAdminPromotion(id) {
+            if (!confirm('คุณต้องการลบโปรโมชั่นนี้ใช่หรือไม่?')) return;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('promotions').delete().eq('id', id);
+                    if (error) throw error;
+                    await fetchAllDataFromSupabase();
+                    showToast('ลบโปรโมชั่นจาก Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
             appState.promotions = (appState.promotions || []).filter(p => p.id !== id);
-            saveState();
+            saveLocalState();
             renderPromotionsTab();
             renderAdminTables();
             showToast('ลบแคมเปญเรียบร้อย');
         }
 
-        // Coupon CRUD
+        // ==================== COUPONS CRUD (SUPABASE CONNECTED) ====================
         function openCouponModal(isEdit = false) {
             if (!isEdit) {
                 document.getElementById('modal-coupon-title').textContent = 'เพิ่มคูปองส่วนลดใหม่';
@@ -2120,7 +2413,7 @@
             document.getElementById('coupon-status').value = c.status;
         }
 
-        function saveAdminCoupon(e) {
+        async function saveAdminCoupon(e) {
             e.preventDefault();
             const editId = document.getElementById('coupon-edit-id').value;
             const code = document.getElementById('coupon-code').value.trim().toUpperCase();
@@ -2130,18 +2423,45 @@
             const condition = document.getElementById('coupon-condition').value.trim();
             const status = document.getElementById('coupon-status').value;
 
-            if (!appState.coupons) appState.coupons = [];
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const payload = {
+                        code: code,
+                        description: desc,
+                        discount_type: type,
+                        discount_value: value,
+                        condition: condition,
+                        status: status
+                    };
 
+                    if (editId) {
+                        const { error } = await supabaseClient.from('coupons').update(payload).eq('id', editId);
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabaseClient.from('coupons').insert([payload]);
+                        if (error) throw error;
+                    }
+
+                    await fetchAllDataFromSupabase();
+                    closeModal('modal-admin-coupon');
+                    showToast('บันทึกคูปองลง Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
+            if (!appState.coupons) appState.coupons = [];
             if (editId) {
                 const idx = appState.coupons.findIndex(c => c.id === editId);
                 if (idx > -1) {
                     appState.coupons[idx] = { id: editId, code, desc, type, value, condition, status };
                 }
             } else {
-                appState.coupons.push({ id: 'c-' + Date.now(), code, desc, type, value, condition, status });
+                appState.coupons.unshift({ id: 'c-' + Date.now(), code, desc, type, value, condition, status });
             }
 
-            saveState();
+            saveLocalState();
             closeModal('modal-admin-coupon');
             renderStorefrontCoupons();
             renderPromotionsTab();
@@ -2149,29 +2469,55 @@
             showToast('บันทึกข้อมูลคูปองเรียบร้อย');
         }
 
-        function deleteAdminCoupon(id) {
+        async function deleteAdminCoupon(id) {
+            if (!confirm('คุณต้องการลบคูปองนี้ใช่หรือไม่?')) return;
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('coupons').delete().eq('id', id);
+                    if (error) throw error;
+                    await fetchAllDataFromSupabase();
+                    showToast('ลบคูปองจาก Supabase เรียบร้อย');
+                    return;
+                } catch (err) {
+                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
+
             appState.coupons = (appState.coupons || []).filter(c => c.id !== id);
-            saveState();
+            saveLocalState();
             renderStorefrontCoupons();
             renderPromotionsTab();
             renderAdminTables();
             showToast('ลบคูปองเรียบร้อย');
         }
 
-        // Settings
-        function saveSettings(e) {
+        // ==================== SETTINGS (SUPABASE CONNECTED) ====================
+        async function saveSettings(e) {
             e.preventDefault();
-            const storeName = document.getElementById('setting-store-name').value;
-            const lineId = document.getElementById('setting-line-id').value;
-            const lineUrl = document.getElementById('setting-line-url').value;
-            const newPass = document.getElementById('setting-admin-pass').value;
+            const storeName = document.getElementById('setting-store-name').value.trim();
+            const lineId = document.getElementById('setting-line-id').value.trim();
+            const lineUrl = document.getElementById('setting-line-url').value.trim();
+
+            if (supabaseClient && appState.isAdminLoggedIn) {
+                try {
+                    const { error } = await supabaseClient.from('settings').upsert({
+                        id: 1,
+                        store_name: storeName,
+                        line_id: lineId,
+                        line_url: lineUrl
+                    });
+                    if (error) throw error;
+                } catch (err) {
+                    showToast(`บันทึกการตั้งค่าไม่สำเร็จ: ${err.message}`, 'error');
+                }
+            }
 
             appState.settings.storeName = storeName;
             appState.settings.lineId = lineId;
             appState.settings.lineUrl = lineUrl;
-            if (newPass) appState.settings.adminPass = newPass;
 
-            saveState();
+            saveLocalState();
             applyStoreSettings();
             showToast('บันทึกการตั้งค่าร้านค้าเรียบร้อย');
         }
@@ -2182,7 +2528,7 @@
             document.getElementById('display-line-id').textContent = appState.settings.lineId;
         }
 
-        // Modal Helpers
+        // ==================== MODAL & TOAST ====================
         function openModal(modalId) {
             document.getElementById(modalId)?.classList.remove('hidden');
         }
@@ -2191,7 +2537,6 @@
             document.getElementById(modalId)?.classList.add('hidden');
         }
 
-        // Custom Toast Notification
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toast-container');
             if (!container) return;
@@ -2213,18 +2558,14 @@
             }, 3000);
         }
 
-        // Global attachments
-        // (Removing inline window.* references to keep the global scope direct and clean)
-
-        // Initialize application on DOM ready
+        // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
-            applyStoreSettings();
-            renderCategoryFilters();
-            renderStorefrontProducts();
-            renderStorefrontCoupons();
-            renderPromotionsTab();
-            renderQueueList();
+            renderAllViews();
             renderLineItemForms();
+            
+            // Check Supabase session & load live data
+            checkSupabaseSession();
+            fetchAllDataFromSupabase();
         });
     </script>
 </body>
