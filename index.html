@@ -919,6 +919,16 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
     <script>
+        // ==================== SECURITY UTILITIES ====================
+        // ฟังก์ชันสำหรับป้องกัน XSS โดยเปลี่ยนอักขระพิเศษเป็น HTML Entities ก่อนนำไปใช้กับ innerHTML
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/[&<>'"]/g, function(tag) {
+                const charsToReplace = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+                return charsToReplace[tag] || tag;
+            });
+        }
+
         // ==================== SUPABASE CONFIGURATION ====================
         const SUPABASE_URL = 'https://whhsgezgatzbakzyisiz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoaHNnZXpnYXR6YmFrenlpc2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODIyNjQsImV4cCI6MjEwNDk1ODI2NH0.wZuyu_EmRcpA4XP3wtKGpcAc6HOdbd2EwF3NZyxeMrU';
@@ -1181,6 +1191,7 @@
                 });
 
                 if (error) {
+                    // อนุญาตให้แสดง error.message ตรงนี้ได้ เพราะเป็นกระบวนการ Login ของแอดมิน เพื่อความชัดเจน
                     showToast(`เข้าสู่ระบบไม่สำเร็จ: ${error.message}`, 'error');
                     loginBtn.disabled = false;
                     loginBtn.innerHTML = originalBtnHtml;
@@ -1203,19 +1214,19 @@
 
                 if (adminErr || !adminRow) {
                     await supabaseClient.auth.signOut();
-                    showToast('บัญชีนี้ไม่มีสิทธิ์เป็นแอดมิน (ไม่พบในตาราง admins)', 'error');
+                    showToast('บัญชีนี้ไม่มีสิทธิ์เป็นแอดมิน', 'error');
                     loginBtn.disabled = false;
                     loginBtn.innerHTML = originalBtnHtml;
                     return;
                 }
 
                 setAdminLoggedInState(user);
-                showToast(`ยินดีต้อนรับแอดมิน: ${user.email}`);
+                showToast(`ยินดีต้อนรับแอดมิน: ${escapeHTML(user.email)}`);
                 fetchAllDataFromSupabase();
 
             } catch (err) {
                 console.error("Admin login error", err);
-                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ Supabase', 'error');
+                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่', 'error');
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = originalBtnHtml;
@@ -1230,7 +1241,7 @@
             document.getElementById('admin-panel-content')?.classList.remove('hidden');
 
             const emailEl = document.getElementById('admin-user-email-display');
-            if (emailEl) emailEl.textContent = user.email || user.id;
+            if (emailEl) emailEl.textContent = escapeHTML(user.email || user.id);
 
             renderAdminTables();
         }
@@ -1280,16 +1291,19 @@
             const queueList = appState.queues || [];
             const isNameDuplicate = queueList.some(q => (q.customerName || '').trim().toLowerCase() === fullName.toLowerCase());
 
+            // ป้องกัน XSS จากตัวแปร fullName ก่อนแสดงผลผ่าน innerHTML
+            const safeFullName = escapeHTML(fullName);
+
             if (isNameDuplicate) {
                 msgEl.classList.remove('hidden', 'text-emerald-600');
                 msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
-                msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${fullName}" มีในระบบคิวแล้ว กรุณาเพิ่มตัวเลขหรือเปลี่ยนชื่อ`;
+                msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${safeFullName}" มีในระบบคิวแล้ว กรุณาเพิ่มตัวเลขหรือเปลี่ยนชื่อ`;
                 input.classList.remove('border-emerald-500');
                 input.classList.add('border-red-500', 'ring-2', 'ring-red-200');
             } else {
                 msgEl.classList.remove('hidden', 'text-red-600');
                 msgEl.className = 'text-xs font-semibold mt-1 text-emerald-600 flex items-center gap-1';
-                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> บันทึกเป็น: <strong>${fullName}</strong>`;
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> บันทึกเป็น: <strong>${safeFullName}</strong>`;
                 input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
                 input.classList.add('border-emerald-500');
             }
@@ -1314,7 +1328,7 @@
                 const discountDesc = matched.type === 'percent' ? `ลด ${matched.value}%` : `ลด ฿${matched.value} บาท`;
                 msgEl.classList.remove('hidden', 'text-red-600');
                 msgEl.className = 'text-xs font-semibold mt-1 text-emerald-600 flex items-center gap-1';
-                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> โค้ดถูกต้อง (${discountDesc})`;
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> โค้ดถูกต้อง (${escapeHTML(discountDesc)})`;
                 input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
                 input.classList.add('border-emerald-500');
             } else {
@@ -1353,15 +1367,17 @@
         function renderCategoryFilters() {
             const container = document.getElementById('category-filter-container');
             if (!container) return;
+            // ใส่ escapeHTML ป้องกัน XSS
             container.innerHTML = appState.categories.map(cat => {
                 const isActive = appState.selectedCategory === cat;
+                const safeCat = escapeHTML(cat);
                 return `
-                    <button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
+                    <button onclick="selectCategory('${safeCat}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
                         isActive 
                             ? 'bg-amber-400 text-amber-950 shadow-sm' 
                             : 'bg-amber-100/60 hover:bg-amber-200 text-amber-900'
                     }">
-                        ${cat}
+                        ${safeCat}
                     </button>
                 `;
             }).join('');
@@ -1403,18 +1419,19 @@
                 return;
             }
 
+            // ใส่ escapeHTML ป้องกัน XSS จากข้อมูลสินค้า
             grid.innerHTML = filtered.map(p => `
                 <div class="bg-white rounded-3xl border border-amber-200 overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col group">
                     <div class="relative overflow-hidden aspect-square bg-amber-50">
-                        <img src="${p.imageUrl}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x400/fef3c7/78350f?text=Jumboo+Shop'">
+                        <img src="${escapeHTML(p.imageUrl)}" alt="${escapeHTML(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x400/fef3c7/78350f?text=Jumboo+Shop'">
                         <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-amber-950 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-200 shadow-sm">
-                            ${p.category}
+                            ${escapeHTML(p.category)}
                         </span>
                     </div>
                     <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
                         <div class="space-y-1.5">
-                            <h3 class="font-bold text-amber-950 text-base leading-snug line-clamp-1">${p.title}</h3>
-                            <p class="text-xs text-amber-800/80 line-clamp-2 leading-relaxed">${p.description || ''}</p>
+                            <h3 class="font-bold text-amber-950 text-base leading-snug line-clamp-1">${escapeHTML(p.title)}</h3>
+                            <p class="text-xs text-amber-800/80 line-clamp-2 leading-relaxed">${escapeHTML(p.description || '')}</p>
                         </div>
                         <div class="pt-2 border-t border-amber-100 flex items-center justify-between gap-2">
                             <div>
@@ -1456,7 +1473,7 @@
             const prod = appState.products.find(p => p.id === productId);
             if (!prod) return;
             document.getElementById('detail-img').src = prod.imageUrl;
-            document.getElementById('detail-category').textContent = prod.category;
+            document.getElementById('detail-category').textContent = prod.category; // textContent ปลอดภัยจาก XSS
             document.getElementById('detail-title').textContent = prod.title;
             document.getElementById('detail-price').textContent = `฿${prod.price}`;
             document.getElementById('detail-desc').textContent = prod.description || '';
@@ -1488,13 +1505,13 @@
                     <div class="bg-white rounded-2xl border border-dashed border-amber-300 p-3.5 flex items-center justify-between gap-3 shadow-sm hover:border-amber-400 transition">
                         <div class="space-y-0.5 min-w-0">
                             <div class="flex items-center gap-1.5">
-                                <span class="font-mono font-bold text-xs bg-amber-100 text-amber-950 px-2 py-0.5 rounded border border-amber-300 tracking-wider">${c.code}</span>
-                                <span class="text-xs font-bold text-rose-600">${discountText}</span>
+                                <span class="font-mono font-bold text-xs bg-amber-100 text-amber-950 px-2 py-0.5 rounded border border-amber-300 tracking-wider">${escapeHTML(c.code)}</span>
+                                <span class="text-xs font-bold text-rose-600">${escapeHTML(discountText)}</span>
                             </div>
-                            <p class="text-[11px] text-amber-800 truncate">${c.desc}</p>
-                            ${c.condition ? `<p class="text-[10px] text-amber-600">${c.condition}</p>` : ''}
+                            <p class="text-[11px] text-amber-800 truncate">${escapeHTML(c.desc)}</p>
+                            ${c.condition ? `<p class="text-[10px] text-amber-600">${escapeHTML(c.condition)}</p>` : ''}
                         </div>
-                        <button onclick="claimStorefrontCoupon('${c.code}', true)" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-bold shrink-0 transition flex items-center gap-1">
+                        <button onclick="claimStorefrontCoupon('${escapeHTML(c.code)}', true)" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-bold shrink-0 transition flex items-center gap-1">
                             <i class="fa-solid fa-check"></i> ใช้คูปองนี้
                         </button>
                     </div>
@@ -1508,10 +1525,10 @@
                 promoContainer.innerHTML = (appState.promotions || []).map(p => `
                     <div class="bg-white/90 p-4 rounded-2xl border border-amber-200 space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">${p.badge || 'PROMO'}</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">${escapeHTML(p.badge || 'PROMO')}</span>
                         </div>
-                        <h4 class="font-bold text-amber-950 text-sm">${p.title}</h4>
-                        <p class="text-xs text-amber-800 leading-relaxed">${p.desc}</p>
+                        <h4 class="font-bold text-amber-950 text-sm">${escapeHTML(p.title)}</h4>
+                        <p class="text-xs text-amber-800 leading-relaxed">${escapeHTML(p.desc)}</p>
                     </div>
                 `).join('');
             }
@@ -1524,13 +1541,13 @@
                         <div class="bg-white border-2 border-dashed border-amber-300 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
                             <div>
                                 <div class="flex justify-between items-start">
-                                    <span class="font-mono font-bold text-sm bg-amber-100 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-300">${c.code}</span>
-                                    <span class="text-sm font-bold text-rose-600">${discountText}</span>
+                                    <span class="font-mono font-bold text-sm bg-amber-100 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-300">${escapeHTML(c.code)}</span>
+                                    <span class="text-sm font-bold text-rose-600">${escapeHTML(discountText)}</span>
                                 </div>
-                                <h4 class="font-bold text-amber-950 text-sm mt-2">${c.desc}</h4>
-                                <p class="text-xs text-amber-700 mt-1">${c.condition || 'ไม่มีขั้นต่ำ'}</p>
+                                <h4 class="font-bold text-amber-950 text-sm mt-2">${escapeHTML(c.desc)}</h4>
+                                <p class="text-xs text-amber-700 mt-1">${escapeHTML(c.condition || 'ไม่มีขั้นต่ำ')}</p>
                             </div>
-                            <button onclick="claimStorefrontCoupon('${c.code}', true)" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-xs transition">
+                            <button onclick="claimStorefrontCoupon('${escapeHTML(c.code)}', true)" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-xs transition">
                                 นำโค้ดนี้ไปสั่งซื้อ
                             </button>
                         </div>
@@ -1599,16 +1616,17 @@
                 return;
             }
 
+            // ใส่ escapeHTML ป้องกันข้อมูลลูกค้าที่อาจเป็น XSS
             container.innerHTML = queues.map(q => `
                 <div class="bg-amber-50/40 border border-amber-200/80 hover:border-amber-300 rounded-2xl p-4 sm:p-5 transition shadow-sm space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
                         <div class="flex items-center gap-3">
                             <span class="font-mono font-bold text-base sm:text-lg bg-white px-3 py-1 rounded-xl border border-amber-300 text-amber-950 shadow-sm">
-                                ${q.code}
+                                ${escapeHTML(q.code)}
                             </span>
                             <div>
-                                <span class="font-bold text-amber-950 text-sm sm:text-base">${q.customerName}</span>
-                                <span class="text-xs text-amber-700 block font-normal">วันที่สั่ง: ${q.orderDate}</span>
+                                <span class="font-bold text-amber-950 text-sm sm:text-base">${escapeHTML(q.customerName)}</span>
+                                <span class="text-xs text-amber-700 block font-normal">วันที่สั่ง: ${escapeHTML(q.orderDate)}</span>
                             </div>
                         </div>
                         <div>
@@ -1618,12 +1636,12 @@
                     <div class="space-y-1.5">
                         <div class="text-xs sm:text-sm text-amber-900 font-medium flex items-start gap-2">
                             <i class="fa-solid fa-box text-amber-500 mt-1"></i>
-                            <span><strong>รายการ:</strong> ${q.items}</span>
+                            <span><strong>รายการ:</strong> ${escapeHTML(q.items)}</span>
                         </div>
                         ${q.note ? `
                             <div class="text-xs text-amber-800 bg-white/80 border border-amber-200 px-3 py-1.5 rounded-xl flex items-start gap-2">
                                 <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
-                                <span><strong>หมายเหตุ:</strong> ${q.note}</span>
+                                <span><strong>หมายเหตุ:</strong> ${escapeHTML(q.note)}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -1689,9 +1707,10 @@
                 const noteVal = prev.note || '';
 
                 const catOptions = availableCategories.map(c => 
-                    `<option value="${c}" ${c === catVal ? 'selected' : ''}>${c}</option>`
+                    `<option value="${escapeHTML(c)}" ${c === catVal ? 'selected' : ''}>${escapeHTML(c)}</option>`
                 ).join('');
 
+                // ใส่ escapeHTML ครอบ Value เก่าที่ดึงจาก DOM เพื่อกัน DOM-based XSS
                 html += `
                     <div class="item-form-group bg-amber-50/60 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-3 transition">
                         <div class="flex items-center justify-between border-b border-amber-200/70 pb-2">
@@ -1709,22 +1728,22 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-amber-900 mb-1">ประเภทของสินค้า เช่น ป้ายบัญชี ลายน้ำ โลโก้</label>
-                                <input type="text" value="${typeVal}" placeholder="เช่น ป้ายบัญชี ลายน้ำ โลโก้" class="item-type w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                                <input type="text" value="${escapeHTML(typeVal)}" placeholder="เช่น ป้ายบัญชี ลายน้ำ โลโก้" class="item-type w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-amber-900 mb-1">ข้อความที่ต้องการใส่ เช่น ชื่อร้าน เลขบช.และอื่นๆ</label>
-                                <input type="text" value="${textVal}" placeholder="เช่น ชื่อร้าน เลขบช.และอื่นๆ" class="item-text w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                                <input type="text" value="${escapeHTML(textVal)}" placeholder="เช่น ชื่อร้าน เลขบช.และอื่นๆ" class="item-text w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-amber-900 mb-1">โทนสี</label>
-                                <input type="text" value="${toneVal}" placeholder="เช่น พาสเทลชมพู-ฟ้า, มินิมอลขาว-เขียว" class="item-tone w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                                <input type="text" value="${escapeHTML(toneVal)}" placeholder="เช่น พาสเทลชมพู-ฟ้า, มินิมอลขาว-เขียว" class="item-tone w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-amber-900 mb-1">หมายเหตุเพิ่มเติมเช่น อยากได้รกๆ เรียบๆ หรืออื่นๆ</label>
-                            <input type="text" value="${noteVal}" placeholder="เช่น อยากได้รกๆ เรียบๆ หรืออื่นๆ" class="item-note w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <input type="text" value="${escapeHTML(noteVal)}" placeholder="เช่น อยากได้รกๆ เรียบๆ หรืออื่นๆ" class="item-note w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
                         </div>
                     </div>
                 `;
@@ -1759,7 +1778,7 @@
                 if (msgEl) {
                     msgEl.classList.remove('hidden', 'text-emerald-600');
                     msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
-                    msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${name}" มีในระบบคิวแล้ว กรุณาตั้งชื่อใหม่`;
+                    msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${escapeHTML(name)}" มีในระบบคิวแล้ว กรุณาตั้งชื่อใหม่`;
                 }
                 if (nameInput) {
                     nameInput.classList.remove('border-emerald-500');
@@ -1919,10 +1938,10 @@
                 prodBody.innerHTML = (appState.products || []).map(p => `
                     <tr class="hover:bg-amber-50/50">
                         <td class="p-3">
-                            <img src="${p.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-amber-200" alt="" onerror="this.src='https://placehold.co/100x100/fef3c7/78350f?text=IMG'">
+                            <img src="${escapeHTML(p.imageUrl)}" class="w-12 h-12 object-cover rounded-xl border border-amber-200" alt="" onerror="this.src='https://placehold.co/100x100/fef3c7/78350f?text=IMG'">
                         </td>
-                        <td class="p-3 font-semibold text-amber-950">${p.title}</td>
-                        <td class="p-3 text-amber-800"><span class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-medium">${p.category}</span></td>
+                        <td class="p-3 font-semibold text-amber-950">${escapeHTML(p.title)}</td>
+                        <td class="p-3 text-amber-800"><span class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-medium">${escapeHTML(p.category)}</span></td>
                         <td class="p-3 font-bold text-amber-950">฿${p.price}</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-2">
@@ -1939,14 +1958,14 @@
             if (queueBody) {
                 queueBody.innerHTML = (appState.queues || []).map(q => `
                     <tr class="hover:bg-amber-50/50">
-                        <td class="p-3 font-mono font-bold text-amber-950">${q.code}</td>
+                        <td class="p-3 font-mono font-bold text-amber-950">${escapeHTML(q.code)}</td>
                         <td class="p-3">
-                            <div class="font-medium text-amber-950">${q.customerName}</div>
-                            ${q.contact ? `<div class="text-[11px] text-amber-700 mt-0.5">${q.contact}</div>` : ''}
+                            <div class="font-medium text-amber-950">${escapeHTML(q.customerName)}</div>
+                            ${q.contact ? `<div class="text-[11px] text-amber-700 mt-0.5">${escapeHTML(q.contact)}</div>` : ''}
                         </td>
-                        <td class="p-3"><div class="text-xs text-amber-900 font-medium">${q.items}</div></td>
+                        <td class="p-3"><div class="text-xs text-amber-900 font-medium">${escapeHTML(q.items)}</div></td>
                         <td class="p-3">${getStatusBadgeHtml(q.status)}</td>
-                        <td class="p-3 text-xs text-amber-800">${q.orderDate}</td>
+                        <td class="p-3 text-xs text-amber-800">${escapeHTML(q.orderDate)}</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button onclick="editAdminQueue('${q.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
@@ -1962,9 +1981,9 @@
             if (promoBody) {
                 promoBody.innerHTML = (appState.promotions || []).map(p => `
                     <tr class="hover:bg-amber-50/50">
-                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">${p.badge || 'PROMO'}</span></td>
-                        <td class="p-3 font-semibold text-amber-950">${p.title}</td>
-                        <td class="p-3 text-xs text-amber-800">${p.desc}</td>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">${escapeHTML(p.badge || 'PROMO')}</span></td>
+                        <td class="p-3 font-semibold text-amber-950">${escapeHTML(p.title)}</td>
+                        <td class="p-3 text-xs text-amber-800">${escapeHTML(p.desc)}</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button onclick="editAdminPromotion('${p.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
@@ -1980,8 +1999,8 @@
             if (couponBody) {
                 couponBody.innerHTML = (appState.coupons || []).map(c => `
                     <tr class="hover:bg-amber-50/50">
-                        <td class="p-3 font-mono font-bold text-amber-950">${c.code}</td>
-                        <td class="p-3 text-amber-900">${c.desc}</td>
+                        <td class="p-3 font-mono font-bold text-amber-950">${escapeHTML(c.code)}</td>
+                        <td class="p-3 text-amber-900">${escapeHTML(c.desc)}</td>
                         <td class="p-3 font-bold text-amber-950">${c.type === 'percent' ? `${c.value}%` : `฿${c.value}`}</td>
                         <td class="p-3">
                             <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${c.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'}">
@@ -2011,7 +2030,7 @@
         function openProductModal(isEdit = false) {
             const select = document.getElementById('prod-category');
             if (select) {
-                select.innerHTML = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => `<option value="${c}">${c}</option>`).join('');
+                select.innerHTML = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
             }
             if (!isEdit) {
                 document.getElementById('modal-product-title').textContent = 'เพิ่มสินค้าใหม่';
@@ -2071,7 +2090,7 @@
                     return;
                 } catch (err) {
                     console.error("Supabase Product Save Error", err);
-                    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+                    showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2103,7 +2122,7 @@
                     return;
                 } catch (err) {
                     console.error("Delete product error", err);
-                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2125,8 +2144,8 @@
             if (!container) return;
             container.innerHTML = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => `
                 <div class="flex items-center justify-between p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-sm">
-                    <span class="font-semibold text-amber-950">${c}</span>
-                    <button onclick="deleteCategory('${c}')" class="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded">
+                    <span class="font-semibold text-amber-950">${escapeHTML(c)}</span>
+                    <button onclick="deleteCategory('${escapeHTML(c)}')" class="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -2148,7 +2167,8 @@
                     showToast('เพิ่มแนวสินค้าสำเร็จ');
                     return;
                 } catch (err) {
-                    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('เกิดข้อผิดพลาดในการเพิ่มข้อมูล', 'error');
                 }
             }
 
@@ -2176,7 +2196,8 @@
                     showToast('ลบแนวสินค้าเรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2263,7 +2284,7 @@
                     return;
                 } catch (err) {
                     console.error("Queue save error", err);
-                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                    showToast('บันทึกไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2294,7 +2315,8 @@
                     showToast('ลบคิวจาก Supabase เรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2350,7 +2372,8 @@
                     showToast('บันทึกโปรโมชั่นลง Supabase เรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('บันทึกไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2382,7 +2405,8 @@
                     showToast('ลบโปรโมชั่นจาก Supabase เรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2456,7 +2480,8 @@
                     showToast('บันทึกคูปองลง Supabase เรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('บันทึกไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2489,7 +2514,8 @@
                     showToast('ลบคูปองจาก Supabase เรียบร้อย');
                     return;
                 } catch (err) {
-                    showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2518,7 +2544,8 @@
                     });
                     if (error) throw error;
                 } catch (err) {
-                    showToast(`บันทึกการตั้งค่าไม่สำเร็จ: ${err.message}`, 'error');
+                    console.error(err);
+                    showToast('บันทึกการตั้งค่าไม่สำเร็จ กรุณาลองใหม่', 'error');
                 }
             }
 
@@ -2532,7 +2559,7 @@
         }
 
         function applyStoreSettings() {
-            document.getElementById('nav-store-name').textContent = appState.settings.storeName;
+            document.getElementById('nav-store-name').textContent = appState.settings.storeName; // textContent prevents XSS here too
             document.getElementById('top-banner-line-id').textContent = appState.settings.lineId;
             document.getElementById('display-line-id').textContent = appState.settings.lineId;
         }
@@ -2553,7 +2580,14 @@
             toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border text-sm font-semibold flex items-center gap-2 transition-all transform translate-y-2 opacity-0 ${
                 type === 'success' ? 'bg-amber-900 text-amber-50 border-amber-700' : 'bg-red-600 text-white border-red-700'
             }`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-yellow-400' : 'fa-triangle-exclamation'}"></i> <span>${msg}</span>`;
+            // Use DOM methods instead of innerHTML to prevent XSS on generic messages
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${type === 'success' ? 'fa-circle-check text-yellow-400' : 'fa-triangle-exclamation'}`;
+            const span = document.createElement('span');
+            span.textContent = msg;
+            
+            toast.appendChild(icon);
+            toast.appendChild(span);
             
             container.appendChild(toast);
             
