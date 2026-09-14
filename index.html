@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUMBOO SHOP - ร้านค้าตัวอย่างและระบบเช็คคิว</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Kanit & Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            bg: '#fffdf5',
+                            card: '#ffffff',
+                            accent: '#fef9c3',
+                            border: '#fef08a',
+                            dark: '#78350f'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Kanit', 'Prompt', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Kanit', 'Prompt', sans-serif;
+            background-color: #fffef7;
+            color: #451a03;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fef9c3;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #fcd34d;
+            border-radius: 10px;
+        }
+        .badge-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.88; transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-200">
+
+    <!-- Top Announcement Banner -->
+    <div class="bg-amber-100 border-b border-amber-200 text-amber-900 text-xs sm:text-sm py-2 px-4 text-center font-medium">
+        <i class="fa-solid fa-circle-info text-amber-600 mr-1.5"></i>
+        เว็บไซต์นี้สำหรับดูตัวอย่างสินค้าและเช็คคิวเท่านั้น สั่งซื้อสินค้าผ่านทาง <span id="top-banner-line-id" class="font-bold underline text-green-700">@655ayoko</span> เท่านั้น
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="sticky top-0 z-40 bg-amber-50/90 backdrop-blur-md border-b border-amber-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('storefront')">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-300 to-yellow-200 flex items-center justify-center shadow-inner border border-yellow-300">
+                        <i class="fa-solid fa-store text-amber-800 text-xl"></i>
+                    </div>
+                    <div>
+                        <span id="nav-store-name" class="font-bold text-xl text-amber-950 block leading-tight">JUMBOO SHOP 🌼</span>
+                        <span class="text-xs text-amber-700 font-normal">Showcase & Order Queue System</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Buttons -->
+                <nav class="hidden md:flex items-center gap-2">
+                    <button onclick="switchTab('storefront')" id="nav-btn-storefront" class="nav-tab-btn px-4 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2 bg-amber-200 text-amber-900 shadow-sm">
+                        <i class="fa-solid fa-table-cells-large"></i> หน้าร้านสินค้า
+                    </button>
+                    
+                    <button onclick="switchTab('queue')" id="nav-btn-queue" class="nav-tab-btn px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-amber-950 shadow-md hover:shadow-lg border border-yellow-300 badge-pulse">
+                        <i class="fa-solid fa-list-check text-amber-900"></i> ตรวจสถานะงาน
+                    </button>
+
+                    <button onclick="switchTab('promotions')" id="nav-btn-promotions" class="nav-tab-btn px-4 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-amber-800 hover:bg-amber-100">
+                        <i class="fa-solid fa-tags text-rose-500"></i> โปรโมชั่น & คูปอง
+                    </button>
+
+                    <button onclick="switchTab('line')" id="nav-btn-line" class="nav-tab-btn px-4 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-amber-800 hover:bg-amber-100">
+                        <i class="fa-brands fa-line text-green-600 text-lg"></i> สั่งผ่าน LINE OA
+                    </button>
+
+                    <button onclick="switchTab('admin')" id="nav-btn-admin" class="nav-tab-btn px-4 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-amber-700 hover:bg-amber-100 border border-dashed border-amber-300">
+                        <i class="fa-solid fa-user-gear"></i> หน้าแอดมิน
+                    </button>
+                </nav>
+
+                <!-- Mobile Menu Toggle Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl text-amber-800 hover:bg-amber-100 focus:outline-none" aria-label="Toggle Navigation">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-amber-200 bg-amber-50 px-4 pt-3 pb-5 space-y-2">
+            <button onclick="switchTab('storefront'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium text-amber-900 hover:bg-amber-100 flex items-center gap-3">
+                <i class="fa-solid fa-table-cells-large w-5 text-center"></i> หน้าร้านสินค้า
+            </button>
+            <button onclick="switchTab('queue'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-semibold bg-gradient-to-r from-amber-300 to-yellow-300 text-amber-950 flex items-center gap-3 shadow-sm">
+                <i class="fa-solid fa-list-check w-5 text-center text-amber-900"></i> ตรวจสถานะงาน
+            </button>
+            <button onclick="switchTab('promotions'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium text-amber-900 hover:bg-amber-100 flex items-center gap-3">
+                <i class="fa-solid fa-tags w-5 text-center text-rose-500"></i> โปรโมชั่น & คูปองส่วนลด
+            </button>
+            <button onclick="switchTab('line'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium text-amber-900 hover:bg-amber-100 flex items-center gap-3">
+                <i class="fa-brands fa-line w-5 text-center text-green-600 text-lg"></i> ติดต่อ / สั่งออเดอร์ผ่าน LINE OA
+            </button>
+            <button onclick="switchTab('admin'); toggleMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium text-amber-800 hover:bg-amber-100 border border-dashed border-amber-300 flex items-center gap-3">
+                <i class="fa-solid fa-user-gear w-5 text-center"></i> หน้าแอดมิน (จัดการระบบ)
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ==================== TAB 1: STOREFRONT ==================== -->
+        <section id="tab-storefront" class="tab-content space-y-8">
+            
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-yellow-200 via-amber-100 to-yellow-100 border border-yellow-300/70 p-6 sm:p-10 shadow-sm">
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-yellow-300 text-amber-900 text-xs font-semibold tracking-wide">
+                        ✨ รับทำป้าย/ลายน้ำ และเว็บไซต์
+                    </span>
+                    <h1 class="text-2xl sm:text-4xl font-bold text-amber-950 leading-tight">
+                        WELCOME TO JUMBOO SHOP
+                    </h1>
+                    <p class="text-sm sm:text-base text-amber-800/90 leading-relaxed">
+                        รวมผลงานของจั้มหากสนใจสอบถาม/สั่งซื้อแอดไลน์ด้านล่างนี้ได้เลย <br class="hidden sm:inline">
+                        หากท่านใดไม่รู้วิธีสั่งสามารถกดไปที่ <span class="inline-flex items-center gap-1 font-bold bg-amber-200/80 text-amber-950 px-2.5 py-0.5 rounded-lg border border-amber-300/80"><i class="fa-brands fa-line text-green-600"></i> "สั่งผ่าน LINE OA"</span> ขวาบนแล้วกรอกข้อมูลได้เลย <br class="hidden sm:inline">
+                        หากสนใจทำเว็บกดแอดไลน์ด้านล่างได้เลย
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="switchTab('queue')" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-semibold shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-clock"></i> ตรวจสถานะงาน
+                        </button>
+                        <button onclick="openLineOA()" class="px-5 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-semibold shadow-sm transition flex items-center gap-2">
+                            <i class="fa-brands fa-line text-lg"></i> แอดไลน์สั่งซื้อสินค้า
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute -right-8 -bottom-10 opacity-20 pointer-events-none hidden sm:block">
+                    <i class="fa-solid fa-gift text-[220px] text-amber-600"></i>
+                </div>
+            </div>
+
+            <!-- Notice Box: Turnaround Time & Rush Orders -->
+            <div class="bg-gradient-to-r from-amber-100/90 to-yellow-100/80 border border-amber-300/90 p-4 sm:p-5 rounded-2xl flex items-start gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-amber-300 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                </div>
+                <div class="text-xs sm:text-sm text-amber-950 leading-relaxed">
+                    <strong class="font-bold text-amber-900 block text-sm mb-0.5">📌 หมายเหตุระยะเวลาส่งมอบงาน:</strong>
+                    แม่ค้าติดงานประจำอาจใช้เวลา 2-3 วัน/คิว ในการส่งงานคืนลูกค้า หากต้องการด่วนภายใน 24 ชม. จะคิดค่าบริการเพิ่ม 50฿
+                </div>
+            </div>
+
+            <!-- Quick Claim Coupons Carousel / Strip -->
+            <div id="storefront-coupons-container" class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-base font-bold text-amber-950 flex items-center gap-2">
+                        <i class="fa-solid fa-ticket-simple text-amber-500"></i> คูปองส่วนลดพิเศษ (กดรับแล้วนำไปใช้ได้ทันที)
+                    </h3>
+                    <button onclick="switchTab('promotions')" class="text-xs font-semibold text-amber-800 hover:text-amber-950 underline flex items-center gap-1">
+                        ดูคูปองทั้งหมด <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+                <div id="storefront-coupon-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Dynamic Storefront Coupons -->
+                </div>
+            </div>
+
+            <!-- Notice box regarding LINE ordering -->
+            <div class="bg-amber-50/80 border-l-4 border-amber-400 p-4 rounded-r-2xl flex items-start gap-3 shadow-sm">
+                <i class="fa-brands fa-line text-green-600 text-2xl mt-0.5"></i>
+                <div class="text-xs sm:text-sm text-amber-900">
+                    <strong class="font-semibold block">ขั้นตอนการสั่งซื้อสินค้า 💬:</strong>
+                    ท่านสามารถเลือกดูรายละเอียดสินค้า แล้วกดปุ่ม <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold border border-green-300"><i class="fa-brands fa-line"></i> สั่งซื้อผ่าน LINE</span> ระบบจะส่งรายละเอียดสินค้าไปยัง LINE Official Account ของร้านค้าได้ทันที!
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+                <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 custom-scrollbar" id="category-filter-container">
+                    <!-- Dynamic categories -->
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-400 text-sm"></i>
+                    <input type="text" id="product-search-input" oninput="renderStorefrontProducts()" placeholder="ค้นหาสินค้าตัวอย่าง..." class="w-full pl-10 pr-4 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 text-amber-950 placeholder-amber-400">
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-amber-950 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-amber-500"></i> รายการสินค้าตัวอย่าง
+                    </h2>
+                    <span id="product-count-badge" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
+                        แสดง 0 รายการ
+                    </span>
+                </div>
+
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Dynamic product cards -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: QUEUE SYSTEM ==================== -->
+        <section id="tab-queue" class="tab-content space-y-6 hidden">
+            
+            <!-- Queue Header -->
+            <div class="bg-gradient-to-r from-amber-200 to-yellow-300 rounded-3xl p-6 sm:p-8 border border-yellow-400/80 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 text-amber-900 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-bolt text-amber-500"></i> อัปเดตสถานะแบบเรียลไทม์
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-amber-950">
+                            ตรวจสถานะงาน
+                        </h1>
+                        <p class="text-sm text-amber-800 mt-1">
+                            สามารถใช้รหัสที่แม่ค้าให้หรือชื่อที่ลูกค้าให้มาค้นหาได้เลย ตัวอย่าง (JB0001-Q) (ตุ้ต้ะต๋อมแต๋ม) เป็นต้น
+                        </p>
+                    </div>
+
+                    <!-- Search inside Queue -->
+                    <div class="w-full md:w-80 bg-white/90 p-2.5 rounded-2xl border border-amber-300 shadow-sm">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 text-sm"></i>
+                            <input type="text" id="queue-search-input" oninput="renderQueueList()" placeholder="ค้นหา รหัสคิว / ชื่อลูกค้า / สินค้า..." class="w-full pl-9 pr-3 py-1.5 bg-amber-50/80 border border-amber-200 rounded-xl text-sm text-amber-950 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Status Legend -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-white p-3 rounded-2xl border border-amber-200 flex items-center gap-3 shadow-sm">
+                    <span class="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0"></span>
+                    <div>
+                        <div class="text-xs font-bold text-amber-900">1. รับออเดอร์</div>
+                        <div class="text-[11px] text-amber-700">ยืนยันคิวสั่งซื้อเรียบร้อย</div>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-amber-200 flex items-center gap-3 shadow-sm">
+                    <span class="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></span>
+                    <div>
+                        <div class="text-xs font-bold text-blue-900">2. กำลังเริ่มทำ</div>
+                        <div class="text-[11px] text-blue-700">อยู่ระหว่างขั้นตอนการผลิต</div>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-amber-200 flex items-center gap-3 shadow-sm">
+                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <div>
+                        <div class="text-xs font-bold text-emerald-900">3. เสร็จแล้ว</div>
+                        <div class="text-[11px] text-emerald-700">ผลิตเสร็จสมบูรณ์</div>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-amber-200 flex items-center gap-3 shadow-sm">
+                    <span class="w-3.5 h-3.5 rounded-full bg-purple-500 shrink-0"></span>
+                    <div>
+                        <div class="text-xs font-bold text-purple-900">4. ส่งลูกค้าแล้ว</div>
+                        <div class="text-[11px] text-purple-700">จัดส่งสินค้าเรียบร้อย</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Items Container -->
+            <div class="bg-white rounded-3xl border border-amber-200 p-4 sm:p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-amber-100">
+                    <h2 class="font-bold text-lg text-amber-950 flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-amber-500"></i> รายการคิวงานทั้งหมด
+                    </h2>
+                    <span id="queue-count-badge" class="text-xs bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-semibold">
+                        รวมทั้งหมด 0 คิว
+                    </span>
+                </div>
+
+                <div id="queue-list-container" class="space-y-4">
+                    <!-- Dynamic queue items -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: PROMOTIONS & COUPONS ==================== -->
+        <section id="tab-promotions" class="tab-content space-y-8 hidden">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="text-center space-y-2">
+                    <span class="px-3.5 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold inline-block border border-rose-200">
+                        🎁 PROMOTIONS & DISCOUNTS
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-amber-950">โปรโมชั่นและคูปองส่วนลดพิเศษ</h1>
+                    <p class="text-sm text-amber-800">เก็บคูปองไปใช้เป็นส่วนลดในออเดอร์ของคุณได้ทันที!</p>
+                </div>
+
+                <!-- Active Campaigns -->
+                <div class="bg-gradient-to-r from-amber-100 via-rose-50 to-yellow-100 border border-amber-300 p-6 rounded-3xl shadow-sm">
+                    <h2 class="text-lg font-bold text-amber-950 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-rose-500"></i> แคมเปญโปรโมชั่นประจำเดือน
+                    </h2>
+                    <div id="promotions-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Dynamic Promotions List -->
+                    </div>
+                </div>
+
+                <!-- Coupons Grid -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-bold text-amber-950 flex items-center gap-2">
+                        <i class="fa-solid fa-ticket-simple text-amber-500"></i> คูปองส่วนลดที่ใช้งานได้
+                    </h2>
+                    <div id="promotions-coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Dynamic Coupon Tickets -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: LINE OA ORDER GENERATOR ==================== -->
+        <section id="tab-line" class="tab-content space-y-8 hidden">
+            <div class="max-w-3xl mx-auto space-y-6">
+                
+                <div class="text-center space-y-3">
+                    <div class="w-16 h-16 bg-green-100 border border-green-300 text-green-600 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-sm">
+                        <i class="fa-brands fa-line"></i>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-amber-950">
+                        สั่งซื้อสินค้าผ่าน LINE OA
+                    </h1>
+                    <p class="text-sm text-amber-800">
+                        ระบุจำนวนป้าย/สินค้าที่ต้องการสั่ง กรอกรายละเอียดแต่ละชิ้น แล้วกดสร้างข้อความส่งเข้า LINE ได้ทันที
+                    </p>
+                </div>
+
+                <!-- Order Generator Card -->
+                <div class="bg-white rounded-3xl border border-amber-200 p-6 sm:p-8 shadow-sm space-y-6">
+                    <div class="border-b border-amber-100 pb-3">
+                        <h2 class="text-lg font-bold text-amber-950 flex items-center gap-2">
+                            <i class="fa-solid fa-file-pen text-amber-500"></i> กรอกรายละเอียดการสั่งซื้อ
+                        </h2>
+                        <!-- Custom Pricing Notice -->
+                        <div class="mt-2 text-xs sm:text-[13px] text-amber-800 bg-amber-50/80 border border-amber-200 rounded-xl p-3 leading-relaxed">
+                            <span class="font-bold text-amber-950">หมายเหตุ:</span> (วันที่อยากได้หรือรายละเอียดอื่นๆ อาจมีการเพิ่มราคาตามความเหมาะสม เช่น อยากได้รับงานวันนี้ เป็นต้น อย่างไรก็ตามสามารถสอบถามแม่ค้าก่อนได้ค้าบ ✨)
+                        </div>
+                    </div>
+
+                    <form id="line-order-form" onsubmit="generateLineMessage(event)" class="space-y-5">
+                        
+                        <!-- Delivery Method Selection -->
+                        <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-200/90 space-y-3">
+                            <label class="block text-sm font-bold text-amber-950">
+                                วิธีรับสินค้า <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+                                    <input type="radio" name="delivery-method" value="drive" checked onchange="toggleDeliveryMethod()" class="w-4 h-4 text-amber-500 focus:ring-amber-400">
+                                    <div class="text-xs sm:text-sm">
+                                        <span class="font-bold text-amber-950 block">1. รับลิ้งไดรฟ์</span>
+                                        <span class="text-amber-700 text-[11px]">รับเป็นลิงก์ Google Drive ดาวน์โหลดเอง</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+                                    <input type="radio" name="delivery-method" value="email" onchange="toggleDeliveryMethod()" class="w-4 h-4 text-amber-500 focus:ring-amber-400">
+                                    <div class="text-xs sm:text-sm">
+                                        <span class="font-bold text-amber-950 block">2. ดึงเมล</span>
+                                        <span class="text-amber-700 text-[11px]">ดึงสิทธิ์เข้าโฟลเดอร์ผ่าน Google Account</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Email Input (Conditional) -->
+                            <div id="delivery-email-container" class="hidden pt-1">
+                                <label class="block text-xs font-semibold text-amber-900 mb-1">
+                                    ระบุอีเมลสำหรับรับงาน (Gmail หรือเมลที่ต้องการให้ดึงเข้า) <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-400 text-sm"></i>
+                                    <input type="email" id="line-customer-email" placeholder="example@gmail.com" class="w-full pl-10 pr-4 py-2.5 bg-white border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Name, Quantity, Coupon Code, and Order Note -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-amber-50/40 p-4 rounded-2xl border border-amber-200/80">
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-900 mb-1.5">
+                                    ชื่อของคุณ / ผู้สั่งซื้อ <span class="text-xs font-normal text-amber-700">(พิมพ์ชื่อแล้วระบบเติมคำว่า "คุณ" ให้เอง)</span> <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="line-customer-name" oninput="validateCustomerNameRealtime()" placeholder="เช่น ตุ้ต้ะต๋อมแต๋ม หรือ ชื่อเล่น" required class="w-full px-4 py-2.5 bg-white border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                <div id="customer-name-validation-msg" class="text-xs font-medium mt-1 hidden"></div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-900 mb-1.5">
+                                    จำนวนชิ้นที่สั่ง <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" id="line-quantity" min="1" max="20" value="1" oninput="renderLineItemForms()" required class="w-full px-4 py-2.5 bg-white border border-amber-200 rounded-xl text-sm font-bold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-900 mb-1.5">
+                                    คูปองส่วนลด <span class="text-xs font-normal text-amber-700">(ถ้ามี กรอกโค้ดได้เลย)</span>
+                                </label>
+                                <input type="text" id="line-coupon-code" oninput="validateCouponInputRealtime()" placeholder="เช่น JUMBOO10, WELCOME30" class="w-full uppercase font-mono px-4 py-2.5 bg-white border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400 transition">
+                                <div id="coupon-validation-msg" class="text-xs font-medium mt-1 hidden"></div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-900 mb-1.5">
+                                    หมายเหตุรวม / วันที่อยากได้ <span class="text-xs font-normal text-amber-700">(ถ้ามี)</span>
+                                </label>
+                                <input type="text" id="line-order-note" placeholder="เช่น อยากได้รับงานวันนี้ / งานด่วน" class="w-full px-4 py-2.5 bg-white border border-amber-200 rounded-xl text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Items Container -->
+                        <div id="line-items-container" class="space-y-4 pt-1">
+                            <!-- Dynamic Item forms will be rendered here based on quantity input -->
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-base shadow-sm transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> สร้างข้อความเตรียมส่ง LINE
+                        </button>
+                    </form>
+
+                    <!-- Preview generated text area -->
+                    <div id="line-preview-box" class="hidden space-y-4 pt-4 border-t border-amber-100">
+                        <label class="block text-sm font-bold text-amber-950 flex items-center gap-2">
+                            <i class="fa-solid fa-message text-green-600"></i> ข้อความที่พร้อมส่งไปยัง LINE OA:
+                        </label>
+                        <div id="line-formatted-text" class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs sm:text-sm font-mono text-amber-900 whitespace-pre-wrap leading-relaxed select-all">
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="copyLineText()" class="flex-1 py-3 rounded-xl bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-medium text-sm transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-copy"></i> คัดลอกข้อความ
+                            </button>
+                            <button onclick="openLineOAWithCurrentMessage()" class="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-brands fa-line text-lg"></i> เด้งไปหน้าแชท LINE OA ทันที
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direct LINE OA banner -->
+                <div class="bg-amber-100/70 border border-amber-300 p-5 rounded-2xl flex items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="text-xs text-amber-800 font-medium">LINE Official Account ID:</div>
+                        <div id="display-line-id" class="text-lg font-bold text-amber-950">@655ayoko</div>
+                    </div>
+                    <button onclick="openLineOA()" class="px-5 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition shrink-0 flex items-center gap-2 shadow-sm">
+                        <i class="fa-brands fa-line text-lg"></i> แอดเพื่อนทาง LINE
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: ADMIN PANEL ==================== -->
+        <section id="tab-admin" class="tab-content space-y-6 hidden">
+            
+            <!-- Admin Login Lock Screen -->
+            <div id="admin-login-card" class="max-w-md mx-auto bg-white p-8 rounded-3xl border border-amber-300 shadow-md space-y-6 text-center">
+                <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto text-amber-800 text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-amber-950">เข้าสู่ระบบแอดมิน</h2>
+                    <p class="text-xs text-amber-700 mt-1">กรอกรหัสผ่านเพื่อจัดการสินค้า คิว และคูปอง (รหัสผ่านเริ่มต้น: <span class="font-bold underline">1234</span>)</p>
+                </div>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <div>
+                        <input type="password" id="admin-passcode" placeholder="กรอกรหัสผ่าน (1234)" required class="w-full px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-lg tracking-widest text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <button type="submit" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold transition shadow-sm">
+                        ปลดล็อกเข้าใช้งาน
+                    </button>
+                </form>
+            </div>
+
+            <!-- Admin Content Panel -->
+            <div id="admin-panel-content" class="hidden space-y-6">
+                
+                <!-- Admin Header & Logout -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-100/80 p-5 rounded-2xl border border-amber-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center text-amber-950 font-bold">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-lg text-amber-950">ระบบจัดการหลังบ้าน (Admin Panel)</h2>
+                            <p class="text-xs text-amber-800">จัดการข้อมูลสินค้า คิวงาน โปรโมชั่น และคูปองส่วนลด</p>
+                        </div>
+                    </div>
+                    <button onclick="adminLogout()" class="px-4 py-2 bg-white hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-xl text-xs font-semibold transition self-start sm:self-auto flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
+                    </button>
+                </div>
+
+                <!-- Admin Sub Navigation Tabs -->
+                <div class="flex flex-wrap border-b border-amber-200 gap-2">
+                    <button onclick="switchAdminSubTab('products')" id="admin-sub-btn-products" class="px-4 py-2.5 font-bold text-sm rounded-t-xl border-b-2 border-amber-500 text-amber-950 bg-amber-100">
+                        <i class="fa-solid fa-box text-amber-700 mr-1.5"></i> จัดการสินค้า
+                    </button>
+                    <button onclick="switchAdminSubTab('queues')" id="admin-sub-btn-queues" class="px-4 py-2.5 font-bold text-sm rounded-t-xl border-b-2 border-transparent text-amber-700 hover:text-amber-950">
+                        <i class="fa-solid fa-list-check text-amber-700 mr-1.5"></i> จัดการคิวงาน
+                    </button>
+                    <button onclick="switchAdminSubTab('promotions')" id="admin-sub-btn-promotions" class="px-4 py-2.5 font-bold text-sm rounded-t-xl border-b-2 border-transparent text-amber-700 hover:text-amber-950">
+                        <i class="fa-solid fa-tags text-amber-700 mr-1.5"></i> โปรโมชั่น & คูปอง
+                    </button>
+                    <button onclick="switchAdminSubTab('settings')" id="admin-sub-btn-settings" class="px-4 py-2.5 font-bold text-sm rounded-t-xl border-b-2 border-transparent text-amber-700 hover:text-amber-950">
+                        <i class="fa-solid fa-gear text-amber-700 mr-1.5"></i> ตั้งค่าร้านค้า & LINE OA
+                    </button>
+                </div>
+
+                <!-- SUB TAB 1: PRODUCT MANAGEMENT -->
+                <div id="admin-sub-products" class="admin-sub-content space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <h3 class="font-bold text-amber-950 text-base">รายการสินค้าทั้งหมด</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openCategoryModal()" class="px-4 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-tags"></i> จัดการแนวสินค้า
+                            </button>
+                            <button onclick="openProductModal()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs sm:text-sm text-amber-950">
+                                <thead class="bg-amber-50 border-b border-amber-200 text-amber-900 font-bold">
+                                    <tr>
+                                        <th class="p-3.5">รูปภาพ</th>
+                                        <th class="p-3.5">ชื่อสินค้า</th>
+                                        <th class="p-3.5">หมวดหมู่</th>
+                                        <th class="p-3.5">ราคาเริ่มต้น</th>
+                                        <th class="p-3.5 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-products-table-body" class="divide-y divide-amber-100">
+                                    <!-- Dynamic product rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 2: QUEUE MANAGEMENT -->
+                <div id="admin-sub-queues" class="admin-sub-content space-y-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-amber-950 text-base">รายการคิวงานทั้งหมด</h3>
+                        <button onclick="openQueueModal()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> เพิ่มรายการคิวใหม่
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs sm:text-sm text-amber-950">
+                                <thead class="bg-amber-50 border-b border-amber-200 text-amber-900 font-bold">
+                                    <tr>
+                                        <th class="p-3.5">รหัสคิว</th>
+                                        <th class="p-3.5">ชื่อลูกค้า</th>
+                                        <th class="p-3.5">รายการสินค้า</th>
+                                        <th class="p-3.5">สถานะคิว</th>
+                                        <th class="p-3.5">วันที่สั่งซื้อ</th>
+                                        <th class="p-3.5 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-queues-table-body" class="divide-y divide-amber-100">
+                                    <!-- Dynamic queue rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 3: PROMOTIONS & COUPONS MANAGEMENT -->
+                <div id="admin-sub-promotions" class="admin-sub-content space-y-6 hidden">
+                    
+                    <!-- Campaigns Management Section -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-amber-950 text-base">จัดการแคมเปญโปรโมชั่น</h3>
+                            <button onclick="openPromotionModal()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> เพิ่มแคมเปญใหม่
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs sm:text-sm text-amber-950">
+                                    <thead class="bg-amber-50 border-b border-amber-200 text-amber-900 font-bold">
+                                        <tr>
+                                            <th class="p-3.5">ป้ายกำกับ</th>
+                                            <th class="p-3.5">หัวข้อโปรโมชั่น</th>
+                                            <th class="p-3.5">รายละเอียด</th>
+                                            <th class="p-3.5 text-center">จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-promotions-table-body" class="divide-y divide-amber-100">
+                                        <!-- Dynamic Promotion Rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coupons Management Section -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-amber-950 text-base">จัดการคูปองส่วนลด</h3>
+                            <button onclick="openCouponModal()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> เพิ่มคูปองใหม่
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs sm:text-sm text-amber-950">
+                                    <thead class="bg-amber-50 border-b border-amber-200 text-amber-900 font-bold">
+                                        <tr>
+                                            <th class="p-3.5">โค้ดคูปอง</th>
+                                            <th class="p-3.5">รายละเอียดส่วนลด</th>
+                                            <th class="p-3.5">มูลค่า</th>
+                                            <th class="p-3.5">สถานะ</th>
+                                            <th class="p-3.5 text-center">จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-coupons-table-body" class="divide-y divide-amber-100">
+                                        <!-- Dynamic Coupon Rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 4: SETTINGS -->
+                <div id="admin-sub-settings" class="admin-sub-content space-y-4 hidden">
+                    <div class="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm max-w-xl space-y-4">
+                        <h3 class="font-bold text-amber-950 text-base border-b border-amber-100 pb-2">ตั้งค่าระบบร้านค้า</h3>
+                        <form onsubmit="saveSettings(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-amber-900 mb-1">ชื่อร้านค้า</label>
+                                <input type="text" id="setting-store-name" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-amber-900 mb-1">LINE Official Account ID (เช่น @655ayoko)</label>
+                                <input type="text" id="setting-line-id" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-amber-900 mb-1">LINE Direct Link (https://lin.ee/...)</label>
+                                <input type="url" id="setting-line-url" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-amber-900 mb-1">รหัสผ่านแอดมินใหม่ (ว่างไว้หากไม่ต้องการเปลี่ยน)</label>
+                                <input type="password" id="setting-admin-pass" placeholder="กรอกรหัสใหม่" class="w-full px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            </div>
+                            <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm transition shadow-sm">
+                                บันทึกการเปลี่ยนแปลง
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Product Detail Modal -->
+    <div id="modal-product-detail" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto custom-scrollbar space-y-4">
+            <button onclick="closeModal('modal-product-detail')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="detail-img" class="w-full h-64 object-cover rounded-2xl border border-amber-200" src="" alt="">
+            <div>
+                <span id="detail-category" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800"></span>
+                <h3 id="detail-title" class="text-xl font-bold text-amber-950 mt-2"></h3>
+                <p id="detail-price" class="text-lg font-bold text-amber-900 mt-1"></p>
+                <p id="detail-desc" class="text-sm text-amber-800 mt-3 whitespace-pre-wrap"></p>
+            </div>
+            <div class="pt-4 border-t border-amber-100 flex gap-2">
+                <button id="detail-order-line-btn" class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-brands fa-line text-xl"></i> สั่งซื้อสินค้านี้ผ่าน LINE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Product Modal (Add/Edit) -->
+    <div id="modal-admin-product" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl relative space-y-4">
+            <button onclick="closeModal('modal-admin-product')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modal-product-title" class="text-lg font-bold text-amber-950">เพิ่มสินค้าใหม่</h3>
+            <form onsubmit="saveAdminProduct(event)" class="space-y-3">
+                <input type="hidden" id="prod-edit-id">
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">ชื่อสินค้า</label>
+                    <input type="text" id="prod-title" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">หมวดหมู่ / แนวสินค้า</label>
+                    <select id="prod-category" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">ราคาเริ่มต้น (บาท)</label>
+                    <input type="number" id="prod-price" required min="0" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">URL รูปภาพสินค้า</label>
+                    <input type="url" id="prod-image" required placeholder="https://..." class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">รายละเอียดสินค้า</label>
+                    <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl transition shadow-sm">
+                    บันทึกข้อมูลสินค้า
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Category Modal -->
+    <div id="modal-admin-category" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl relative space-y-4">
+            <button onclick="closeModal('modal-admin-category')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-amber-950">จัดการหมวดหมู่ / แนวสินค้า</h3>
+            <form onsubmit="addCategory(event)" class="flex gap-2">
+                <input type="text" id="new-category-name" required placeholder="ชื่อหมวดหมู่ใหม่" class="flex-1 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                <button type="submit" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm transition">
+                    เพิ่ม
+                </button>
+            </form>
+            <div id="category-list-manage" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                <!-- Dynamic Category List -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Queue Modal -->
+    <div id="modal-admin-queue" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl relative space-y-4">
+            <button onclick="closeModal('modal-admin-queue')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modal-queue-title" class="text-lg font-bold text-amber-950">เพิ่มคิวสินค้าใหม่</h3>
+            <form onsubmit="saveAdminQueue(event)" class="space-y-3">
+                <input type="hidden" id="queue-edit-id">
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">รหัสคิว (เช่น JB0006-Q)</label>
+                    <input type="text" id="queue-code" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">ชื่อลูกค้า (ระบบเติม "คุณ" ให้อัตโนมัติ)</label>
+                    <input type="text" id="queue-customer" placeholder="เช่น ตุ้ต้ะต๋อมแต๋ม หรือ ชื่อเล่น" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">รายการสินค้าที่สั่ง</label>
+                    <input type="text" id="queue-items" required placeholder="เช่น พวงกุญแจไหมพรม x2" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">ช่องทางการติดต่อ</label>
+                    <input type="text" id="queue-contact" placeholder="เช่น LINE: @user / 081-234-5678" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">หมายเหตุเพิ่มเติม</label>
+                    <textarea id="queue-note" rows="2" placeholder="เช่น ส่งด่วน 24 ชม., โทนสีพิเศษ" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">สถานะคิว</label>
+                    <select id="queue-status" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <option value="received">1. รับออเดอร์</option>
+                        <option value="in_progress">2. กำลังเริ่มทำ</option>
+                        <option value="completed">3. เสร็จแล้ว</option>
+                        <option value="delivered">4. ส่งลูกค้าแล้ว</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">วันที่สั่งซื้อ</label>
+                    <input type="date" id="queue-date" required class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl transition shadow-sm">
+                    บันทึกข้อมูลคิว
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Coupon Modal -->
+    <div id="modal-admin-coupon" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl relative space-y-4">
+            <button onclick="closeModal('modal-admin-coupon')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modal-coupon-title" class="text-lg font-bold text-amber-950">เพิ่มคูปองส่วนลด</h3>
+            <form onsubmit="saveAdminCoupon(event)" class="space-y-3">
+                <input type="hidden" id="coupon-edit-id">
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">โค้ดคูปอง (ตัวพิมพ์ใหญ่)</label>
+                    <input type="text" id="coupon-code" required placeholder="เช่น JUMBOO10" class="w-full uppercase font-mono px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">คำอธิบาย</label>
+                    <input type="text" id="coupon-desc" required placeholder="เช่น ส่วนลดต้อนรับ 10%" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-900 mb-1">ประเภทส่วนลด</label>
+                        <select id="coupon-type" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="percent">ลดเป็นเปอร์เซ็นต์ (%)</option>
+                            <option value="fixed">ลดเป็นบาท (฿)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-900 mb-1">มูลค่า</label>
+                        <input type="number" id="coupon-value" required min="1" placeholder="10 หรือ 50" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">เงื่อนไขเพิ่มเติม (ถ้ามี)</label>
+                    <input type="text" id="coupon-condition" placeholder="เช่น ไม่มีขั้นต่ำ" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">สถานะ</label>
+                    <select id="coupon-status" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <option value="active">เปิดใช้งาน (Active)</option>
+                        <option value="inactive">ปิดใช้งาน (Inactive)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl transition shadow-sm">
+                    บันทึกคูปอง
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Promotion Campaign Modal -->
+    <div id="modal-admin-promotion" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl relative space-y-4">
+            <button onclick="closeModal('modal-admin-promotion')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center justify-between">
+                <h3 id="modal-promotion-title" class="text-lg font-bold text-amber-950">เพิ่มแคมเปญโปรโมชั่นใหม่</h3>
+            </div>
+            <form onsubmit="saveAdminPromotion(event)" class="space-y-3">
+                <input type="hidden" id="promo-edit-id">
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">ป้ายกำกับ (Badge)</label>
+                    <input type="text" id="promo-badge" required placeholder="เช่น HOT DEAL 🔥 หรือ BUY 2 GET 1 🎁" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">หัวข้อโปรโมชั่น</label>
+                    <input type="text" id="promo-title" required placeholder="เช่น สั่งซื้อ 3 ชิ้นขึ้นไป ส่งฟรีทันที" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 mb-1">รายละเอียดเงื่อนไข</label>
+                    <textarea id="promo-desc" rows="3" required placeholder="รายละเอียดโปรโมชั่น..." class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl transition shadow-sm">
+                    บันทึกโปรโมชั่น
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // Storage Key
+        const STORAGE_KEY = 'jumboo_shop_store_data_v10';
+
+        // Default application state
+        const defaultState = {
+            settings: {
+                storeName: 'JUMBOO SHOP 🌼',
+                lineId: '@655ayoko',
+                lineUrl: 'https://lin.ee/8eKqm7X',
+                adminPass: '1234'
+            },
+            categories: ['ทั้งหมด', 'พวงกุญแจไหมพรม', 'กระเป๋าแฮนด์เมด', 'เคสโทรศัพท์เดคูพาจ', 'ของขวัญ DIY'],
+            products: [
+                {
+                    id: 'prod-1',
+                    title: 'พวงกุญแจดอกเดซี่ไหมพรม 🌼',
+                    category: 'พวงกุญแจไหมพรม',
+                    price: 89,
+                    imageUrl: 'https://images.unsplash.com/photo-1607344645866-009c320b5ab8?w=500&auto=format&fit=crop&q=80',
+                    description: 'พวงกุญแจไหมพรมถักมือ รูปดอกเดซี่พาสเทล น่ารักละมุน เหมาะสำหรับห้อยกระเป๋าหรือกุญแจบ้าน'
+                },
+                {
+                    id: 'prod-2',
+                    title: 'กระเป๋าไหมพรมสะพายข้างพาสเทล 🧶',
+                    category: 'กระเป๋าแฮนด์เมด',
+                    price: 350,
+                    imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&auto=format&fit=crop&q=80',
+                    description: 'กระเป๋าถักไหมพรมเนื้อนุ่ม ถักแน่น แข็งแรง ทนทาน จุของได้เยอะ เหมาะกับลุคมินิมอล'
+                },
+                {
+                    id: 'prod-3',
+                    title: 'เคสโทรศัพท์แต่งวิปครีมเทียม 🍦',
+                    category: 'เคสโทรศัพท์เดคูพาจ',
+                    price: 290,
+                    imageUrl: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=500&auto=format&fit=crop&q=80',
+                    description: 'เคสโทรศัพท์ DIY ประดับวิปครีมเทียมและเรซินรูปขนมหวาน เลือกสีวิปครีมและตัวการ์ตูนสั่งทำได้'
+                },
+                {
+                    id: 'prod-4',
+                    title: 'พวงกุญแจหมีน้อยไหมพรม 🧸',
+                    category: 'พวงกุญแจไหมพรม',
+                    price: 120,
+                    imageUrl: 'https://images.unsplash.com/photo-1558679908-541bcf1249ff?w=500&auto=format&fit=crop&q=80',
+                    description: 'ตุ๊กตาหมีน้อยไหมพรมขนาดพกพา สั่งระบุสีโบว์และสีไหมพรมตามใจชอบได้'
+                },
+                {
+                    id: 'prod-5',
+                    title: 'กรอบรูปแต่งดอกไม้แห้ง DIY 🖼️',
+                    category: 'ของขวัญ DIY',
+                    price: 250,
+                    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
+                    description: 'กรอบรูปไม้ขนาด 4x6 นิ้ว ตกแต่งด้วยดอกไม้แห้งสีหวาน มอบเป็นของขวัญวันครบรอบหรือวันเกิด'
+                }
+            ],
+            queues: [
+                {
+                    id: 'q-1',
+                    code: 'JB0001-Q',
+                    customerName: 'คุณเมย์',
+                    contact: 'LINE: may_diy',
+                    items: 'พวงกุญแจดอกเดซี่ไหมพรม x2',
+                    note: 'ขอไหมพรมโทนชมพูพาสเทล',
+                    status: 'delivered',
+                    orderDate: '2026-09-08'
+                },
+                {
+                    id: 'q-2',
+                    code: 'JB0002-Q',
+                    customerName: 'คุณแอน',
+                    contact: 'โทร 089-123-4567',
+                    items: 'กระเป๋าไหมพรมสะพายข้าง x1',
+                    note: 'จัดส่งด่วนแบบ EMS',
+                    status: 'completed',
+                    orderDate: '2026-09-10'
+                },
+                {
+                    id: 'q-3',
+                    code: 'JB0003-Q',
+                    customerName: 'คุณตุ้ต้ะต๋อมแต๋ม',
+                    contact: 'LINE: fah_sweet',
+                    items: 'เคสโทรศัพท์แต่งวิปครีมเทียม x1 (iPhone 15)',
+                    note: 'เพิ่มตัวการ์ตูนกระต่ายตรงกลาง',
+                    status: 'in_progress',
+                    orderDate: '2026-09-12'
+                },
+                {
+                    id: 'q-4',
+                    code: 'JB0004-Q',
+                    customerName: 'คุณกิ๊ฟ',
+                    contact: 'IG: gift_crafts',
+                    items: 'พวงกุญแจหมีน้อยไหมพรม x3',
+                    note: 'ผูกโบว์สีชมพู 2 ชิ้น สีฟ้า 1 ชิ้น',
+                    status: 'received',
+                    orderDate: '2026-09-13'
+                },
+                {
+                    id: 'q-5',
+                    code: 'JB0005-Q',
+                    customerName: 'คุณป๊อป',
+                    contact: 'LINE: pop_craft',
+                    items: 'กรอบรูปแต่งดอกไม้แห้ง DIY x1',
+                    note: 'เขียนการ์ดอวยพรวันเกิดเพิ่มเติม',
+                    status: 'received',
+                    orderDate: '2026-09-14'
+                }
+            ],
+            coupons: [
+                { id: 'c-1', code: 'JUMBOO10', desc: 'ส่วนลดพิเศษลูกค้าใหม่', type: 'percent', value: 10, condition: 'ไม่มีขั้นต่ำ', status: 'active' },
+                { id: 'c-2', code: 'WELCOME30', desc: 'ลดทันที 30 บาท', type: 'fixed', value: 30, condition: 'เมื่อสั่งครบ 200฿', status: 'active' },
+                { id: 'c-3', code: 'HANDMADE50', desc: 'ลดจัดเต็ม 50 บาท', type: 'fixed', value: 50, condition: 'เมื่อสั่งซื้อ 3 ชิ้นขึ้นไป', status: 'active' }
+            ],
+            promotions: [
+                { id: 'p-1', title: 'โปรโมชั่นเดือนนี้: สั่งทำ 3 ชิ้นขึ้นไป', desc: 'รับฟรีทันทีของที่ระลึก DIY สลักชื่อฟรีจากทางร้าน พร้อมส่งฟรี!', badge: 'HOT DEAL 🔥' },
+                { id: 'p-2', title: 'งานด่วนภายใน 24 ชม.', desc: 'บริการเร่งด่วนสำหรับผู้ที่ต้องการใช้วันนี้ คิดค่าบริการเพิ่ม 50฿/คิว สอบถามก่อนสั่งได้เลย', badge: 'RUSH ORDER ⚡' }
+            ],
+            selectedCategory: 'ทั้งหมด',
+            isAdminLoggedIn: false
+        };
+
+        let appState = loadState();
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return { 
+                        ...defaultState, 
+                        ...parsed, 
+                        settings: { ...defaultState.settings, ...(parsed.settings || {}) },
+                        coupons: Array.isArray(parsed.coupons) ? parsed.coupons : defaultState.coupons,
+                        promotions: Array.isArray(parsed.promotions) ? parsed.promotions : defaultState.promotions,
+                        isAdminLoggedIn: false 
+                    };
+                }
+            } catch (e) {
+                console.error("Error loading state", e);
+            }
+            return { ...defaultState };
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    settings: appState.settings,
+                    categories: appState.categories,
+                    products: appState.products,
+                    queues: appState.queues,
+                    coupons: appState.coupons,
+                    promotions: appState.promotions
+                }));
+            } catch (e) {
+                console.error("Error saving state", e);
+            }
+        }
+
+        // Helper to prepend "คุณ" automatically
+        function formatCustomerName(rawName) {
+            if (!rawName) return '';
+            const trimmed = rawName.trim();
+            if (trimmed.startsWith('คุณ')) {
+                return trimmed;
+            }
+            return 'คุณ' + trimmed;
+        }
+
+        // Real-time Customer Name Validation & Auto-prefixing display
+        function validateCustomerNameRealtime() {
+            const input = document.getElementById('line-customer-name');
+            const msgEl = document.getElementById('customer-name-validation-msg');
+            if (!input || !msgEl) return;
+
+            const rawVal = input.value.trim();
+            if (!rawVal) {
+                msgEl.classList.add('hidden');
+                msgEl.innerHTML = '';
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-200', 'border-emerald-500');
+                return;
+            }
+
+            const fullName = formatCustomerName(rawVal);
+            const queueList = appState.queues || [];
+            const isNameDuplicate = queueList.some(q => (q.customerName || '').trim().toLowerCase() === fullName.toLowerCase());
+
+            if (isNameDuplicate) {
+                msgEl.classList.remove('hidden', 'text-emerald-600');
+                msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
+                msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${fullName}" มีในระบบคิวแล้ว กรุณาเพิ่มตัวเลขหรือเปลี่ยนชื่อ`;
+                input.classList.remove('border-emerald-500');
+                input.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+            } else {
+                msgEl.classList.remove('hidden', 'text-red-600');
+                msgEl.className = 'text-xs font-semibold mt-1 text-emerald-600 flex items-center gap-1';
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> บันทึกเป็น: <strong>${fullName}</strong>`;
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+                input.classList.add('border-emerald-500');
+            }
+        }
+
+        // Real-time Coupon Validation
+        function validateCouponInputRealtime() {
+            const input = document.getElementById('line-coupon-code');
+            const msgEl = document.getElementById('coupon-validation-msg');
+            if (!input || !msgEl) return;
+
+            const val = input.value.trim().toUpperCase();
+            if (!val) {
+                msgEl.classList.add('hidden');
+                msgEl.innerHTML = '';
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-200', 'border-emerald-500');
+                return;
+            }
+
+            const couponsList = appState.coupons || [];
+            const matched = couponsList.find(c => (c.code || '').toUpperCase() === val && c.status === 'active');
+            if (matched) {
+                const discountDesc = matched.type === 'percent' ? `ลด ${matched.value}%` : `ลด ฿${matched.value} บาท`;
+                msgEl.classList.remove('hidden', 'text-red-600');
+                msgEl.className = 'text-xs font-semibold mt-1 text-emerald-600 flex items-center gap-1';
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> โค้ดถูกต้อง (${discountDesc})`;
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+                input.classList.add('border-emerald-500');
+            } else {
+                msgEl.classList.remove('hidden', 'text-emerald-600');
+                msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> เขียนโค้ดผิด`;
+                input.classList.remove('border-emerald-500');
+                input.classList.add('border-red-500');
+            }
+        }
+
+        // Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-200', 'text-amber-900', 'shadow-sm');
+                btn.classList.add('text-amber-800');
+            });
+
+            const activeBtn = document.getElementById(`nav-btn-${tabId}`);
+            if (activeBtn && tabId !== 'queue') {
+                activeBtn.classList.add('bg-amber-200', 'text-amber-900', 'shadow-sm');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        // Storefront Rendering
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filter-container');
+            if (!container) return;
+            container.innerHTML = appState.categories.map(cat => {
+                const isActive = appState.selectedCategory === cat;
+                return `
+                    <button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
+                        isActive 
+                            ? 'bg-amber-400 text-amber-950 shadow-sm' 
+                            : 'bg-amber-100/60 hover:bg-amber-200 text-amber-900'
+                    }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCategory(cat) {
+            appState.selectedCategory = cat;
+            renderCategoryFilters();
+            renderStorefrontProducts();
+        }
+
+        function renderStorefrontProducts() {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            const search = document.getElementById('product-search-input')?.value.toLowerCase().trim() || '';
+
+            let filtered = appState.products;
+            if (appState.selectedCategory !== 'ทั้งหมด') {
+                filtered = filtered.filter(p => p.category === appState.selectedCategory);
+            }
+            if (search) {
+                filtered = filtered.filter(p => 
+                    (p.title || '').toLowerCase().includes(search) || 
+                    (p.description || '').toLowerCase().includes(search) ||
+                    (p.category || '').toLowerCase().includes(search)
+                );
+            }
+
+            const badge = document.getElementById('product-count-badge');
+            if (badge) badge.textContent = `แสดง ${filtered.length} รายการ`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-amber-700 space-y-3 bg-white rounded-3xl border border-amber-200">
+                        <i class="fa-solid fa-box-open text-5xl opacity-40"></i>
+                        <p class="font-medium text-sm">ไม่พบสินค้าตัวอย่างที่ตรงกับคำค้นหา</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-3xl border border-amber-200 overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col group">
+                    <div class="relative overflow-hidden aspect-square bg-amber-50">
+                        <img src="${p.imageUrl}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x400/fef3c7/78350f?text=Jumboo+Shop'">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-amber-950 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-200 shadow-sm">
+                            ${p.category}
+                        </span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-amber-950 text-base leading-snug line-clamp-1">${p.title}</h3>
+                            <p class="text-xs text-amber-800/80 line-clamp-2 leading-relaxed">${p.description || ''}</p>
+                        </div>
+                        <div class="pt-2 border-t border-amber-100 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] text-amber-700 block font-normal">ราคาเริ่มต้น</span>
+                                <span class="text-lg font-bold text-amber-950">฿${p.price}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="openProductDetail('${p.id}')" title="ดูรายละเอียด" class="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold text-xs flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-eye"></i> ดูสินค้า
+                                </button>
+                                <button onclick="quickOrderLine('${p.id}')" title="สั่งซื้อผ่าน LINE" class="p-2 rounded-xl bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition font-bold shadow-sm">
+                                    <i class="fa-brands fa-line text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function quickOrderLine(productId) {
+            switchTab('line');
+            const prod = appState.products.find(p => p.id === productId);
+            if (prod) {
+                const qty = document.getElementById('line-quantity');
+                if (qty) qty.value = 1;
+                renderLineItemForms();
+                const group = document.querySelector('.item-form-group');
+                if (group) {
+                    const catSelect = group.querySelector('.item-cat');
+                    const typeInput = group.querySelector('.item-type');
+                    if (catSelect) catSelect.value = prod.category;
+                    if (typeInput) typeInput.value = prod.title;
+                }
+            }
+        }
+
+        function openProductDetail(productId) {
+            const prod = appState.products.find(p => p.id === productId);
+            if (!prod) return;
+            document.getElementById('detail-img').src = prod.imageUrl;
+            document.getElementById('detail-category').textContent = prod.category;
+            document.getElementById('detail-title').textContent = prod.title;
+            document.getElementById('detail-price').textContent = `฿${prod.price}`;
+            document.getElementById('detail-desc').textContent = prod.description || '';
+            
+            const lineBtn = document.getElementById('detail-order-line-btn');
+            if (lineBtn) {
+                lineBtn.onclick = () => {
+                    closeModal('modal-product-detail');
+                    quickOrderLine(prod.id);
+                };
+            }
+            openModal('modal-product-detail');
+        }
+
+        // ==================== COUPONS & PROMOTIONS ====================
+        function renderStorefrontCoupons() {
+            const container = document.getElementById('storefront-coupon-cards');
+            if (!container) return;
+
+            const activeCoupons = (appState.coupons || []).filter(c => c.status === 'active');
+            if (activeCoupons.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-xs text-amber-700 bg-white p-3 rounded-xl border border-amber-200 text-center">ไม่มีคูปองส่วนลดที่เปิดใช้งานอยู่ในขณะนี้</div>`;
+                return;
+            }
+
+            container.innerHTML = activeCoupons.map(c => {
+                const discountText = c.type === 'percent' ? `ลด ${c.value}%` : `ลด ฿${c.value}`;
+                return `
+                    <div class="bg-white rounded-2xl border border-dashed border-amber-300 p-3.5 flex items-center justify-between gap-3 shadow-sm hover:border-amber-400 transition">
+                        <div class="space-y-0.5 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-bold text-xs bg-amber-100 text-amber-950 px-2 py-0.5 rounded border border-amber-300 tracking-wider">${c.code}</span>
+                                <span class="text-xs font-bold text-rose-600">${discountText}</span>
+                            </div>
+                            <p class="text-[11px] text-amber-800 truncate">${c.desc}</p>
+                            ${c.condition ? `<p class="text-[10px] text-amber-600">${c.condition}</p>` : ''}
+                        </div>
+                        <button onclick="claimStorefrontCoupon('${c.code}', true)" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-bold shrink-0 transition flex items-center gap-1">
+                            <i class="fa-solid fa-check"></i> ใช้คูปองนี้
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPromotionsTab() {
+            const promoContainer = document.getElementById('promotions-list-container');
+            if (promoContainer) {
+                promoContainer.innerHTML = (appState.promotions || []).map(p => `
+                    <div class="bg-white/90 p-4 rounded-2xl border border-amber-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">${p.badge || 'PROMO'}</span>
+                        </div>
+                        <h4 class="font-bold text-amber-950 text-sm">${p.title}</h4>
+                        <p class="text-xs text-amber-800 leading-relaxed">${p.desc}</p>
+                    </div>
+                `).join('');
+            }
+
+            const couponGrid = document.getElementById('promotions-coupons-grid');
+            if (couponGrid) {
+                couponGrid.innerHTML = (appState.coupons || []).filter(c => c.status === 'active').map(c => {
+                    const discountText = c.type === 'percent' ? `ลด ${c.value}%` : `ลด ฿${c.value}`;
+                    return `
+                        <div class="bg-white border-2 border-dashed border-amber-300 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <span class="font-mono font-bold text-sm bg-amber-100 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-300">${c.code}</span>
+                                    <span class="text-sm font-bold text-rose-600">${discountText}</span>
+                                </div>
+                                <h4 class="font-bold text-amber-950 text-sm mt-2">${c.desc}</h4>
+                                <p class="text-xs text-amber-700 mt-1">${c.condition || 'ไม่มีขั้นต่ำ'}</p>
+                            </div>
+                            <button onclick="claimStorefrontCoupon('${c.code}', true)" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-xs transition">
+                                นำโค้ดนี้ไปสั่งซื้อ
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function claimStorefrontCoupon(code, goToLine = false) {
+            const input = document.getElementById('line-coupon-code');
+            if (input) {
+                input.value = code;
+                validateCouponInputRealtime();
+            }
+            if (goToLine) {
+                switchTab('line');
+                showToast(`ใส่โค้ด ${code} ในฟอร์มสั่งซื้อเรียบร้อย!`);
+            } else {
+                showToast(`ใส่โค้ด ${code} เรียบร้อย!`);
+            }
+        }
+
+        // ==================== QUEUE SYSTEM ====================
+        function getStatusBadgeHtml(status) {
+            switch (status) {
+                case 'received':
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> 1. รับออเดอร์</span>`;
+                case 'in_progress':
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-900 border border-blue-300 inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> 2. กำลังเริ่มทำ</span>`;
+                case 'completed':
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 3. เสร็จแล้ว</span>`;
+                case 'delivered':
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-900 border border-purple-300 inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> 4. ส่งลูกค้าแล้ว</span>`;
+                default:
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">ไม่ระบุ</span>`;
+            }
+        }
+
+        function renderQueueList() {
+            const container = document.getElementById('queue-list-container');
+            if (!container) return;
+            const searchInput = document.getElementById('queue-search-input');
+            const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            let queues = [...(appState.queues || [])].reverse();
+
+            if (search) {
+                queues = queues.filter(q => 
+                    (q.code || '').toLowerCase().includes(search) || 
+                    (q.customerName || '').toLowerCase().includes(search) ||
+                    (q.items || '').toLowerCase().includes(search) ||
+                    (q.note && q.note.toLowerCase().includes(search))
+                );
+            }
+
+            const badge = document.getElementById('queue-count-badge');
+            if (badge) badge.textContent = `รวมทั้งหมด ${queues.length} คิว`;
+
+            if (queues.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-amber-700 space-y-2 bg-amber-50/50 rounded-2xl border border-dashed border-amber-200">
+                        <i class="fa-solid fa-folder-open text-4xl opacity-40"></i>
+                        <p class="font-medium text-sm">ไม่พบรายการคิวสินค้าที่ค้นหา</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = queues.map(q => `
+                <div class="bg-amber-50/40 border border-amber-200/80 hover:border-amber-300 rounded-2xl p-4 sm:p-5 transition shadow-sm space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono font-bold text-base sm:text-lg bg-white px-3 py-1 rounded-xl border border-amber-300 text-amber-950 shadow-sm">
+                                ${q.code}
+                            </span>
+                            <div>
+                                <span class="font-bold text-amber-950 text-sm sm:text-base">${q.customerName}</span>
+                                <span class="text-xs text-amber-700 block font-normal">วันที่สั่ง: ${q.orderDate}</span>
+                            </div>
+                        </div>
+                        <div>
+                            ${getStatusBadgeHtml(q.status)}
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="text-xs sm:text-sm text-amber-900 font-medium flex items-start gap-2">
+                            <i class="fa-solid fa-box text-amber-500 mt-1"></i>
+                            <span><strong>รายการ:</strong> ${q.items}</span>
+                        </div>
+                        ${q.note ? `
+                            <div class="text-xs text-amber-800 bg-white/80 border border-amber-200 px-3 py-1.5 rounded-xl flex items-start gap-2">
+                                <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                                <span><strong>หมายเหตุ:</strong> ${q.note}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== LINE ORDER GENERATOR ====================
+        function toggleDeliveryMethod() {
+            const isEmail = document.querySelector('input[name="delivery-method"]:checked')?.value === 'email';
+            const emailContainer = document.getElementById('delivery-email-container');
+            const emailInput = document.getElementById('line-customer-email');
+            
+            if (isEmail) {
+                if (emailContainer) emailContainer.classList.remove('hidden');
+                if (emailInput) {
+                    emailInput.setAttribute('required', 'required');
+                    emailInput.focus();
+                }
+            } else {
+                if (emailContainer) emailContainer.classList.add('hidden');
+                if (emailInput) {
+                    emailInput.removeAttribute('required');
+                    emailInput.value = '';
+                }
+            }
+        }
+
+        function renderLineItemForms() {
+            const container = document.getElementById('line-items-container');
+            if (!container) return;
+
+            const qtyInput = document.getElementById('line-quantity');
+            let count = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+            if (count < 1) count = 1;
+            if (count > 20) {
+                count = 20;
+                if (qtyInput) qtyInput.value = 20; // Visual fix for max limit
+            }
+
+            const existingForms = container.querySelectorAll('.item-form-group');
+            const prevValues = [];
+            existingForms.forEach((group) => {
+                prevValues.push({
+                    cat: group.querySelector('.item-cat')?.value || '',
+                    type: group.querySelector('.item-type')?.value || '',
+                    text: group.querySelector('.item-text')?.value || '',
+                    tone: group.querySelector('.item-tone')?.value || '',
+                    note: group.querySelector('.item-note')?.value || ''
+                });
+            });
+
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                const prev = prevValues[i] || {};
+                const catVal = prev.cat || (appState.categories.filter(c => c !== 'ทั้งหมด')[0] || '');
+                const typeVal = prev.type || '';
+                const textVal = prev.text || '';
+                const toneVal = prev.tone || '';
+                const noteVal = prev.note || '';
+
+                const catOptions = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => 
+                    `<option value="${c}" ${c === catVal ? 'selected' : ''}>${c}</option>`
+                ).join('');
+
+                html += `
+                    <div class="item-form-group bg-amber-50/60 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-3 transition">
+                        <div class="flex items-center justify-between border-b border-amber-200/70 pb-2">
+                            <span class="font-bold text-amber-950 text-sm flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs font-bold">${i + 1}</span>
+                                รายการป้าย / สินค้าชิ้นที่ ${i + 1}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-amber-900 mb-1">แนวสินค้า</label>
+                                <select class="item-cat w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                    ${catOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-amber-900 mb-1">ประเภทของสินค้า เช่น ป้ายบัญชี ลายน้ำ โลโก้</label>
+                                <input type="text" value="${typeVal}" placeholder="เช่น ป้ายบัญชี ลายน้ำ โลโก้" class="item-type w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-amber-900 mb-1">ข้อความที่ต้องการใส่ เช่น ชื่อร้าน เลขบช.และอื่นๆ</label>
+                                <input type="text" value="${textVal}" placeholder="เช่น ชื่อร้าน เลขบช.และอื่นๆ" class="item-text w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-amber-900 mb-1">โทนสี</label>
+                                <input type="text" value="${toneVal}" placeholder="เช่น พาสเทลชมพู-ฟ้า, มินิมอลขาว-เขียว" class="item-tone w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-amber-900 mb-1">หมายเหตุเพิ่มเติมเช่น อยากได้รกๆ เรียบๆ หรืออื่นๆ</label>
+                            <input type="text" value="${noteVal}" placeholder="เช่น อยากได้รกๆ เรียบๆ หรืออื่นๆ" class="item-note w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        let currentGeneratedLineMsg = '';
+
+        function generateLineMessage(e) {
+            e.preventDefault();
+            const rawName = document.getElementById('line-customer-name')?.value.trim() || '';
+            const orderNote = document.getElementById('line-order-note')?.value?.trim() || '';
+            const couponVal = document.getElementById('line-coupon-code')?.value?.trim().toUpperCase() || '';
+            const qtyInput = document.getElementById('line-quantity');
+            const count = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+
+            if (!rawName) {
+                showToast('กรุณากรอกชื่อของคุณหรือผู้สั่งซื้อ', 'error');
+                document.getElementById('line-customer-name')?.focus();
+                return;
+            }
+
+            const name = formatCustomerName(rawName);
+
+            // Check if customer name duplicates an existing queue name
+            const queueList = appState.queues || [];
+            const isNameDuplicate = queueList.some(q => (q.customerName || '').trim().toLowerCase() === name.toLowerCase());
+            if (isNameDuplicate) {
+                const nameInput = document.getElementById('line-customer-name');
+                const msgEl = document.getElementById('customer-name-validation-msg');
+                if (msgEl) {
+                    msgEl.classList.remove('hidden', 'text-emerald-600');
+                    msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
+                    msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> "${name}" มีในระบบคิวแล้ว กรุณาตั้งชื่อใหม่`;
+                }
+                if (nameInput) {
+                    nameInput.classList.remove('border-emerald-500');
+                    nameInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                    nameInput.focus();
+                }
+                document.getElementById('line-preview-box')?.classList.add('hidden');
+                currentGeneratedLineMsg = '';
+                showToast('ชื่อนี้ซ้ำกับในระบบคิวแล้ว กรุณาตั้งชื่อใหม่', 'error');
+                return;
+            }
+
+            const deliveryType = document.querySelector('input[name="delivery-method"]:checked')?.value || 'drive';
+            const emailValue = document.getElementById('line-customer-email')?.value?.trim() || '';
+            
+            if (deliveryType === 'email' && !emailValue) {
+                showToast('กรุณากรอกอีเมลสำหรับรับงาน', 'error');
+                document.getElementById('line-customer-email')?.focus();
+                return;
+            }
+
+            let couponLine = '';
+            if (couponVal) {
+                const couponsList = appState.coupons || [];
+                const matchedCoupon = couponsList.find(c => c.code.toUpperCase() === couponVal && c.status === 'active');
+                if (!matchedCoupon) {
+                    const couponInput = document.getElementById('line-coupon-code');
+                    const msgEl = document.getElementById('coupon-validation-msg');
+                    if (msgEl) {
+                        msgEl.classList.remove('hidden', 'text-emerald-600');
+                        msgEl.className = 'text-xs font-semibold mt-1 text-red-600 flex items-center gap-1';
+                        msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> เขียนโค้ดผิด';
+                    }
+                    if (couponInput) {
+                        couponInput.classList.remove('border-emerald-500');
+                        couponInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                        couponInput.focus();
+                    }
+                    document.getElementById('line-preview-box')?.classList.add('hidden');
+                    currentGeneratedLineMsg = '';
+                    showToast('เขียนโค้ดผิด กรุณาตรวจสอบโค้ดคูปอง', 'error');
+                    return;
+                }
+                const discountDesc = matchedCoupon.type === 'percent' 
+                    ? `ลด ${matchedCoupon.value}%` 
+                    : `ลด ฿${matchedCoupon.value} บาท`;
+                couponLine = `คูปองที่ใช้: ${matchedCoupon.code} (${discountDesc})\n`;
+            } else {
+                couponLine = `คูปองที่ใช้: -\n`;
+            }
+
+            const deliveryText = deliveryType === 'email'
+                ? `2. ดึงเมล (${emailValue})`
+                : `1. รับลิ้งไดรฟ์`;
+
+            const groups = document.querySelectorAll('.item-form-group');
+            let itemsText = '';
+
+            groups.forEach((group, idx) => {
+                const cat = group.querySelector('.item-cat')?.value || '-';
+                const type = group.querySelector('.item-type')?.value || '-';
+                const text = group.querySelector('.item-text')?.value || '-';
+                const tone = group.querySelector('.item-tone')?.value || '-';
+                const note = group.querySelector('.item-note')?.value?.trim() || '';
+
+                itemsText += `\nชิ้นที่ ${idx + 1}:\n` +
+                    `- แนวสินค้า: ${cat}\n` +
+                    `- ประเภท: ${type}\n` +
+                    `- ข้อความ: ${text}\n` +
+                    `- โทนสี: ${tone}\n` +
+                    (note ? `- หมายเหตุ: ${note}\n` : '');
+            });
+
+            currentGeneratedLineMsg = `ชื่อผู้สั่ง: ${name}\n` +
+                `วิธีรับสินค้า: ${deliveryText}\n` +
+                `จำนวน: ${count} ชิ้น\n` +
+                couponLine +
+                (orderNote ? `หมายเหตุรวม: ${orderNote}\n` : '') +
+                itemsText;
+
+            const previewTextEl = document.getElementById('line-formatted-text');
+            if (previewTextEl) previewTextEl.textContent = currentGeneratedLineMsg.trim();
+            document.getElementById('line-preview-box')?.classList.remove('hidden');
+            showToast('สร้างข้อความสั่งซื้อเรียบร้อย!');
+        }
+
+        function copyLineText() {
+            if (!currentGeneratedLineMsg) return;
+
+            // Updated modern clipboard copy with fallback
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(currentGeneratedLineMsg).then(() => {
+                    showToast('คัดลอกข้อความแล้ว!');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(currentGeneratedLineMsg);
+                });
+            } else {
+                fallbackCopyTextToClipboard(currentGeneratedLineMsg);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.style.position = 'fixed'; // Prevent scrolling to bottom
+            document.body.appendChild(temp);
+            temp.focus();
+            temp.select();
+            try {
+                document.execCommand('copy');
+                showToast('คัดลอกข้อความแล้ว!');
+            } catch (err) {
+                showToast('ไม่สามารถคัดลอกได้ กรุณากดคัดลอกด้วยตนเอง', 'error');
+            }
+            document.body.removeChild(temp);
+        }
+
+        function openLineOAWithCurrentMessage() {
+            if (!currentGeneratedLineMsg) return;
+            copyLineText();
+            const cleanId = (appState.settings.lineId || '@655ayoko').replace('@', '');
+            const nativeUrl = `line://ti/p/%40${cleanId}`;
+            const fallbackUrl = appState.settings.lineUrl || `https://line.me/R/ti/p/%40${cleanId}`;
+
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = nativeUrl;
+                setTimeout(() => {
+                    window.location.href = fallbackUrl;
+                }, 800);
+            } else {
+                window.open(fallbackUrl, '_blank');
+            }
+        }
+
+        function openLineOA() {
+            const cleanId = (appState.settings.lineId || '@655ayoko').replace('@', '');
+            const nativeUrl = `line://ti/p/%40${cleanId}`;
+            const fallbackUrl = appState.settings.lineUrl || `https://line.me/R/ti/p/%40${cleanId}`;
+
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = nativeUrl;
+                setTimeout(() => {
+                    window.location.href = fallbackUrl;
+                }, 800);
+            } else {
+                window.open(fallbackUrl, '_blank');
+            }
+        }
+
+        // ==================== ADMIN PANEL ====================
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('admin-passcode')?.value;
+            if (input === appState.settings.adminPass) {
+                appState.isAdminLoggedIn = true;
+                document.getElementById('admin-login-card')?.classList.add('hidden');
+                document.getElementById('admin-panel-content')?.classList.remove('hidden');
+                renderAdminTables();
+                showToast('เข้าสู่ระบบแอดมินสำเร็จ');
+            } else {
+                showToast('รหัสผ่านไม่ถูกต้อง', 'error');
+            }
+        }
+
+        function adminLogout() {
+            appState.isAdminLoggedIn = false;
+            document.getElementById('admin-login-card')?.classList.remove('hidden');
+            document.getElementById('admin-panel-content')?.classList.add('hidden');
+            const passInput = document.getElementById('admin-passcode');
+            if (passInput) passInput.value = '';
+            showToast('ออกจากระบบแอดมินเรียบร้อย');
+        }
+
+        function switchAdminSubTab(subTab) {
+            document.querySelectorAll('.admin-sub-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`admin-sub-${subTab}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('[id^="admin-sub-btn-"]').forEach(btn => {
+                btn.classList.remove('border-amber-500', 'text-amber-950', 'bg-amber-100');
+                btn.classList.add('border-transparent', 'text-amber-700');
+            });
+
+            const activeBtn = document.getElementById(`admin-sub-btn-${subTab}`);
+            if (activeBtn) {
+                activeBtn.classList.add('border-amber-500', 'text-amber-950', 'bg-amber-100');
+            }
+        }
+
+        function renderAdminTables() {
+            // Products
+            const prodBody = document.getElementById('admin-products-table-body');
+            if (prodBody) {
+                prodBody.innerHTML = (appState.products || []).map(p => `
+                    <tr class="hover:bg-amber-50/50">
+                        <td class="p-3">
+                            <img src="${p.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-amber-200" alt="" onerror="this.src='https://placehold.co/100x100/fef3c7/78350f?text=IMG'">
+                        </td>
+                        <td class="p-3 font-semibold text-amber-950">${p.title}</td>
+                        <td class="p-3 text-amber-800"><span class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-medium">${p.category}</span></td>
+                        <td class="p-3 font-bold text-amber-950">฿${p.price}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editAdminProduct('${p.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAdminProduct('${p.id}')" class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Queues
+            const queueBody = document.getElementById('admin-queues-table-body');
+            if (queueBody) {
+                const displayQueues = [...(appState.queues || [])].reverse();
+                queueBody.innerHTML = displayQueues.map(q => `
+                    <tr class="hover:bg-amber-50/50">
+                        <td class="p-3 font-mono font-bold text-amber-950">${q.code}</td>
+                        <td class="p-3">
+                            <div class="font-medium text-amber-950">${q.customerName}</div>
+                            ${q.contact ? `<div class="text-[11px] text-amber-700 mt-0.5">${q.contact}</div>` : ''}
+                        </td>
+                        <td class="p-3"><div class="text-xs text-amber-900 font-medium">${q.items}</div></td>
+                        <td class="p-3">${getStatusBadgeHtml(q.status)}</td>
+                        <td class="p-3 text-xs text-amber-800">${q.orderDate}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editAdminQueue('${q.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAdminQueue('${q.id}')" class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Promotions
+            const promoBody = document.getElementById('admin-promotions-table-body');
+            if (promoBody) {
+                promoBody.innerHTML = (appState.promotions || []).map(p => `
+                    <tr class="hover:bg-amber-50/50">
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">${p.badge || 'PROMO'}</span></td>
+                        <td class="p-3 font-semibold text-amber-950">${p.title}</td>
+                        <td class="p-3 text-xs text-amber-800">${p.desc}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editAdminPromotion('${p.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAdminPromotion('${p.id}')" class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Coupons
+            const couponBody = document.getElementById('admin-coupons-table-body');
+            if (couponBody) {
+                couponBody.innerHTML = (appState.coupons || []).map(c => `
+                    <tr class="hover:bg-amber-50/50">
+                        <td class="p-3 font-mono font-bold text-amber-950">${c.code}</td>
+                        <td class="p-3 text-amber-900">${c.desc}</td>
+                        <td class="p-3 font-bold text-amber-950">${c.type === 'percent' ? `${c.value}%` : `฿${c.value}`}</td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${c.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'}">
+                                ${c.status === 'active' ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editAdminCoupon('${c.id}')" class="p-2 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAdminCoupon('${c.id}')" class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Settings Inputs
+            const sName = document.getElementById('setting-store-name');
+            const sLine = document.getElementById('setting-line-id');
+            const sUrl = document.getElementById('setting-line-url');
+            if (sName) sName.value = appState.settings.storeName;
+            if (sLine) sLine.value = appState.settings.lineId;
+            if (sUrl) sUrl.value = appState.settings.lineUrl;
+        }
+
+        // Product CRUD
+        function openProductModal(isEdit = false) {
+            const select = document.getElementById('prod-category');
+            if (select) {
+                select.innerHTML = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+            if (!isEdit) {
+                document.getElementById('modal-product-title').textContent = 'เพิ่มสินค้าใหม่';
+                document.getElementById('prod-edit-id').value = '';
+                document.getElementById('prod-title').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-image').value = '';
+                document.getElementById('prod-desc').value = '';
+            }
+            openModal('modal-admin-product');
+        }
+
+        function editAdminProduct(id) {
+            const p = appState.products.find(item => item.id === id);
+            if (!p) return;
+            openProductModal(true);
+            document.getElementById('modal-product-title').textContent = 'แก้ไขข้อมูลสินค้า';
+            document.getElementById('prod-edit-id').value = p.id;
+            document.getElementById('prod-title').value = p.title;
+            document.getElementById('prod-category').value = p.category;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-image').value = p.imageUrl;
+            document.getElementById('prod-desc').value = p.description || '';
+        }
+
+        function saveAdminProduct(e) {
+            e.preventDefault();
+            const editId = document.getElementById('prod-edit-id').value;
+            const title = document.getElementById('prod-title').value;
+            const category = document.getElementById('prod-category').value;
+            const price = parseFloat(document.getElementById('prod-price').value) || 0;
+            const imageUrl = document.getElementById('prod-image').value;
+            const description = document.getElementById('prod-desc').value;
+
+            if (editId) {
+                const idx = appState.products.findIndex(p => p.id === editId);
+                if (idx > -1) {
+                    appState.products[idx] = { id: editId, title, category, price, imageUrl, description };
+                }
+            } else {
+                appState.products.push({ id: 'prod-' + Date.now(), title, category, price, imageUrl, description });
+            }
+
+            saveState();
+            closeModal('modal-admin-product');
+            renderStorefrontProducts();
+            renderAdminTables();
+            showToast('บันทึกข้อมูลสินค้าเรียบร้อย');
+        }
+
+        function deleteAdminProduct(id) {
+            appState.products = appState.products.filter(p => p.id !== id);
+            saveState();
+            renderStorefrontProducts();
+            renderAdminTables();
+            showToast('ลบสินค้าเรียบร้อย');
+        }
+
+        // Category CRUD
+        function openCategoryModal() {
+            renderCategoryManageList();
+            openModal('modal-admin-category');
+        }
+
+        function renderCategoryManageList() {
+            const container = document.getElementById('category-list-manage');
+            if (!container) return;
+            container.innerHTML = appState.categories.filter(c => c !== 'ทั้งหมด').map(c => `
+                <div class="flex items-center justify-between p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-sm">
+                    <span class="font-semibold text-amber-950">${c}</span>
+                    <button onclick="deleteCategory('${c}')" class="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addCategory(e) {
+            e.preventDefault();
+            const val = document.getElementById('new-category-name')?.value.trim();
+            if (val && !appState.categories.includes(val)) {
+                appState.categories.push(val);
+                saveState();
+                document.getElementById('new-category-name').value = '';
+                renderCategoryFilters();
+                renderCategoryManageList();
+                showToast('เพิ่มแนวสินค้าสำเร็จ');
+            }
+        }
+
+        function deleteCategory(catName) {
+            appState.categories = appState.categories.filter(c => c !== catName);
+            saveState();
+            renderCategoryFilters();
+            renderCategoryManageList();
+            showToast('ลบแนวสินค้าเรียบร้อย');
+        }
+
+        // Queue CRUD
+        function openQueueModal(isEdit = false) {
+            if (!isEdit) {
+                document.getElementById('modal-queue-title').textContent = 'เพิ่มคิวสินค้าใหม่';
+                document.getElementById('queue-edit-id').value = '';
+                document.getElementById('queue-code').value = `JB000${(appState.queues || []).length + 1}-Q`;
+                document.getElementById('queue-customer').value = '';
+                document.getElementById('queue-contact').value = '';
+                document.getElementById('queue-items').value = '';
+                document.getElementById('queue-note').value = '';
+                document.getElementById('queue-status').value = 'received';
+                
+                // Get valid timezone date format for Thai/Local
+                const today = new Date();
+                const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                document.getElementById('queue-date').value = localDate;
+            }
+            openModal('modal-admin-queue');
+        }
+
+        function editAdminQueue(id) {
+            const q = appState.queues.find(item => item.id === id);
+            if (!q) return;
+            openQueueModal(true);
+            document.getElementById('modal-queue-title').textContent = 'แก้ไขข้อมูลคิว';
+            document.getElementById('queue-edit-id').value = q.id;
+            document.getElementById('queue-code').value = q.code;
+            
+            // Fix substring for Thai "คุณ" (length 3, not 2)
+            const rawCustomerName = (q.customerName || '').startsWith('คุณ') ? q.customerName.substring(3) : q.customerName;
+            document.getElementById('queue-customer').value = rawCustomerName;
+            
+            document.getElementById('queue-contact').value = q.contact || '';
+            document.getElementById('queue-items').value = q.items;
+            document.getElementById('queue-note').value = q.note || '';
+            document.getElementById('queue-status').value = q.status;
+            document.getElementById('queue-date').value = q.orderDate;
+        }
+
+        function saveAdminQueue(e) {
+            e.preventDefault();
+            const editId = document.getElementById('queue-edit-id').value;
+            const code = document.getElementById('queue-code').value;
+            const rawCustomerName = document.getElementById('queue-customer').value;
+            const customerName = formatCustomerName(rawCustomerName);
+            const contact = document.getElementById('queue-contact').value;
+            const items = document.getElementById('queue-items').value;
+            const note = document.getElementById('queue-note').value;
+            const status = document.getElementById('queue-status').value;
+            const orderDate = document.getElementById('queue-date').value;
+
+            if (editId) {
+                const idx = appState.queues.findIndex(q => q.id === editId);
+                if (idx > -1) {
+                    appState.queues[idx] = { id: editId, code, customerName, contact, items, note, status, orderDate };
+                }
+            } else {
+                appState.queues.push({ id: 'q-' + Date.now(), code, customerName, contact, items, note, status, orderDate });
+            }
+
+            saveState();
+            closeModal('modal-admin-queue');
+            renderQueueList();
+            renderAdminTables();
+            showToast('บันทึกคิวเรียบร้อย');
+        }
+
+        function deleteAdminQueue(id) {
+            appState.queues = appState.queues.filter(q => q.id !== id);
+            saveState();
+            renderQueueList();
+            renderAdminTables();
+            showToast('ลบคิวเรียบร้อย');
+        }
+
+        // Promotion (Monthly Campaign) CRUD
+        function openPromotionModal(isEdit = false) {
+            if (!isEdit) {
+                document.getElementById('modal-promotion-title').textContent = 'เพิ่มแคมเปญโปรโมชั่นใหม่';
+                document.getElementById('promo-edit-id').value = '';
+                document.getElementById('promo-badge').value = 'HOT DEAL 🔥';
+                document.getElementById('promo-title').value = '';
+                document.getElementById('promo-desc').value = '';
+            }
+            openModal('modal-admin-promotion');
+        }
+
+        function editAdminPromotion(id) {
+            const promo = (appState.promotions || []).find(item => item.id === id);
+            if (!promo) return;
+            openPromotionModal(true);
+            document.getElementById('modal-promotion-title').textContent = 'แก้ไขแคมเปญโปรโมชั่น';
+            document.getElementById('promo-edit-id').value = promo.id;
+            document.getElementById('promo-badge').value = promo.badge || 'PROMO';
+            document.getElementById('promo-title').value = promo.title;
+            document.getElementById('promo-desc').value = promo.desc;
+        }
+
+        function saveAdminPromotion(e) {
+            e.preventDefault();
+            const editId = document.getElementById('promo-edit-id').value;
+            const badge = document.getElementById('promo-badge').value.trim();
+            const title = document.getElementById('promo-title').value.trim();
+            const desc = document.getElementById('promo-desc').value.trim();
+
+            if (!appState.promotions) appState.promotions = [];
+
+            if (editId) {
+                const idx = appState.promotions.findIndex(p => p.id === editId);
+                if (idx > -1) {
+                    appState.promotions[idx] = { id: editId, badge, title, desc };
+                }
+            } else {
+                appState.promotions.push({ id: 'p-' + Date.now(), badge, title, desc });
+            }
+
+            saveState();
+            closeModal('modal-admin-promotion');
+            renderPromotionsTab();
+            renderAdminTables();
+            showToast('บันทึกแคมเปญโปรโมชั่นเรียบร้อย');
+        }
+
+        function deleteAdminPromotion(id) {
+            appState.promotions = (appState.promotions || []).filter(p => p.id !== id);
+            saveState();
+            renderPromotionsTab();
+            renderAdminTables();
+            showToast('ลบแคมเปญเรียบร้อย');
+        }
+
+        // Coupon CRUD
+        function openCouponModal(isEdit = false) {
+            if (!isEdit) {
+                document.getElementById('modal-coupon-title').textContent = 'เพิ่มคูปองส่วนลดใหม่';
+                document.getElementById('coupon-edit-id').value = '';
+                document.getElementById('coupon-code').value = '';
+                document.getElementById('coupon-desc').value = '';
+                document.getElementById('coupon-type').value = 'percent';
+                document.getElementById('coupon-value').value = '';
+                document.getElementById('coupon-condition').value = '';
+                document.getElementById('coupon-status').value = 'active';
+            }
+            openModal('modal-admin-coupon');
+        }
+
+        function editAdminCoupon(id) {
+            const c = (appState.coupons || []).find(item => item.id === id);
+            if (!c) return;
+            openCouponModal(true);
+            document.getElementById('modal-coupon-title').textContent = 'แก้ไขคูปองส่วนลด';
+            document.getElementById('coupon-edit-id').value = c.id;
+            document.getElementById('coupon-code').value = c.code;
+            document.getElementById('coupon-desc').value = c.desc;
+            document.getElementById('coupon-type').value = c.type;
+            document.getElementById('coupon-value').value = c.value;
+            document.getElementById('coupon-condition').value = c.condition || '';
+            document.getElementById('coupon-status').value = c.status;
+        }
+
+        function saveAdminCoupon(e) {
+            e.preventDefault();
+            const editId = document.getElementById('coupon-edit-id').value;
+            const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            const desc = document.getElementById('coupon-desc').value.trim();
+            const type = document.getElementById('coupon-type').value;
+            const value = parseFloat(document.getElementById('coupon-value').value) || 0;
+            const condition = document.getElementById('coupon-condition').value.trim();
+            const status = document.getElementById('coupon-status').value;
+
+            if (!appState.coupons) appState.coupons = [];
+
+            if (editId) {
+                const idx = appState.coupons.findIndex(c => c.id === editId);
+                if (idx > -1) {
+                    appState.coupons[idx] = { id: editId, code, desc, type, value, condition, status };
+                }
+            } else {
+                appState.coupons.push({ id: 'c-' + Date.now(), code, desc, type, value, condition, status });
+            }
+
+            saveState();
+            closeModal('modal-admin-coupon');
+            renderStorefrontCoupons();
+            renderPromotionsTab();
+            renderAdminTables();
+            showToast('บันทึกข้อมูลคูปองเรียบร้อย');
+        }
+
+        function deleteAdminCoupon(id) {
+            appState.coupons = (appState.coupons || []).filter(c => c.id !== id);
+            saveState();
+            renderStorefrontCoupons();
+            renderPromotionsTab();
+            renderAdminTables();
+            showToast('ลบคูปองเรียบร้อย');
+        }
+
+        // Settings
+        function saveSettings(e) {
+            e.preventDefault();
+            const storeName = document.getElementById('setting-store-name').value;
+            const lineId = document.getElementById('setting-line-id').value;
+            const lineUrl = document.getElementById('setting-line-url').value;
+            const newPass = document.getElementById('setting-admin-pass').value;
+
+            appState.settings.storeName = storeName;
+            appState.settings.lineId = lineId;
+            appState.settings.lineUrl = lineUrl;
+            if (newPass) appState.settings.adminPass = newPass;
+
+            saveState();
+            applyStoreSettings();
+            showToast('บันทึกการตั้งค่าร้านค้าเรียบร้อย');
+        }
+
+        function applyStoreSettings() {
+            document.getElementById('nav-store-name').textContent = appState.settings.storeName;
+            document.getElementById('top-banner-line-id').textContent = appState.settings.lineId;
+            document.getElementById('display-line-id').textContent = appState.settings.lineId;
+        }
+
+        // Modal Helpers
+        function openModal(modalId) {
+            document.getElementById(modalId)?.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId)?.classList.add('hidden');
+        }
+
+        // Custom Toast Notification
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border text-sm font-semibold flex items-center gap-2 transition-all transform translate-y-2 opacity-0 ${
+                type === 'success' ? 'bg-amber-900 text-amber-50 border-amber-700' : 'bg-red-600 text-white border-red-700'
+            }`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-yellow-400' : 'fa-triangle-exclamation'}"></i> <span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Global attachments
+        // (Removing inline window.* references to keep the global scope direct and clean)
+
+        // Initialize application on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoreSettings();
+            renderCategoryFilters();
+            renderStorefrontProducts();
+            renderStorefrontCoupons();
+            renderPromotionsTab();
+            renderQueueList();
+            renderLineItemForms();
+        });
+    </script>
+</body>
+</html>
